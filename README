@@ -1,0 +1,33 @@
+DESCRIPTION:
+This is a simple 2-D sidescroller/shooter game that I developed using SFML. This is my firstish game (refactored this
+one completelty) that I have done and I did not want to compromise and make the game itself simple because of a lack
+of code depth.
+
+CONTROLS:
+W A S D to move
+Left Mouse Button to shoot
+Right Mouse Button to knife
+Spacebar to deploy parachute (not yet active)
+
+REQUIRED FILES:
+SFML 2.0 (or later) DLLs
+Some game data that I have not yet uploaded
+
+UPDATE LOG:
+V1.0 (Initial Commit):
+Character movement
+Character knifing and shooting
+Bullets(Projectiles) with animation
+Background
+Scrolling
+Level editor with local storage
+Level loading from local storage
+Character-Level collision detection
+Projectile-Level collision detection
+
+FEATURES TO BE ADDED:
+Enemies with AI
+Possibly Fullscreen Integration
+GUI Menu (Instead Of Command Prompt)
+Parachute ability
+End of level sequence
