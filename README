@@ -7,27 +7,33 @@ CONTROLS:
 W A S D to move
 Left Mouse Button to shoot
 Right Mouse Button to knife
-Spacebar to deploy parachute (not yet active)
+Spacebar to deploy parachute
 
 REQUIRED FILES:
 SFML 2.0 (or later) DLLs
 Some game data that I have not yet uploaded
 
 UPDATE LOG:
+V1.1:
++Deploy Parachute
++updatePlayer() (previously named applySpeed())
+-applySpeed()
+
 V1.0 (Initial Commit):
-Character movement
-Character knifing and shooting
-Bullets(Projectiles) with animation
-Background
-Scrolling
-Level editor with local storage
-Level loading from local storage
-Character-Level collision detection
-Projectile-Level collision detection
+Base Game
++Character movement
++Character knifing and shooting
++Bullets(Projectiles) with animation
++Background
++Scrolling
++Level editor with local storage
++Level loading from local storage
++Character-Level collision detection
++Projectile-Level collision detection
 
 FEATURES TO BE ADDED:
 Enemies with AI
 Possibly Fullscreen Integration
 GUI Menu (Instead Of Command Prompt)
-Parachute ability
+In Game Sound
 End of level sequence
