@@ -7,7 +7,7 @@ const string Player::SPRITE_MANIFEST("~Manifest.txt"), Player::SPRITE_PATH("data
 const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200, 200);
 
 Player::Player() : currentAnimation(STAND_RIGHT), lastAnimation(currentAnimation), currentTracking(BOTTOM_RIGHT), lastTracking(currentTracking),
-                   scrollOffset(DEFAULT_SCROLL), xSpeed(0), ySpeed(0), jumped(false), shot(false), knifed(false), falling(true), parachute(true)
+                   scrollOffset(DEFAULT_SCROLL), xSpeed(0), ySpeed(0), jumped(false), shot(false), knifed(false), falling(true), parachute(false)
 {
     ifstream spriteManifest;
     string fileName;
@@ -50,7 +50,7 @@ void Player::runLeft()
 
 void Player::jump()
 {
-    if (!jumped) {
+    if (!jumped && !parachute) {
         ySpeed = JUMP_SPEED;
         jumped = true;
     }
@@ -65,25 +65,25 @@ void Player::deployParachute()
 
 void Player::knife()
 {
-    if (!knifed && !shot) {
+    if (!knifed && !shot && !parachute) {
         knifed = true;
     }
 }
 
 void Player::shoot()
 {
-    if (!shot && !knifed) {
+    if (!shot && !knifed && !parachute) {
         shot = true;
     }
 }
 
-bool Player::applySpeed(Level& currentLevel)
+bool Player::updatePlayer(Level& currentLevel)
 {
     bool scroll = false, updatedAnimation = true;
     Level::BoundType vert, horiz;
 
     //Update Animation Immediately Or Wait
-    if (knifed || shot) {
+    if (knifed || shot || parachute) {
         //If Knifing Or Shooting
         updateAnimation();
         animationWait.restart();
@@ -118,9 +118,15 @@ bool Player::applySpeed(Level& currentLevel)
     if ((vert == Level::NO_BOUND) || (vert == Level::TOP_BOUND && ySpeed >= 0) || (vert == Level::BOTTOM_BOUND)) {
         yCoord += ySpeed;
         if (ySpeed < 0) {
+            jumped = true;
             ySpeed += ASCEND_GRAVITY;
         } else {
-            ySpeed += DESCEND_GRAVITY;
+            if (parachute) {
+                ySpeed += DESCEND_GRAVITY / 5;
+            } else {
+                ySpeed += DESCEND_GRAVITY;
+            }
+            falling = true;
         }
     }
 
@@ -149,6 +155,8 @@ bool Player::applySpeed(Level& currentLevel)
 
     if (vert == Level::BOTTOM_BOUND) {
         jumped = false;
+        falling = false;
+        parachute = false;
         ySpeed = 0;
     } else if (vert == Level::TOP_BOUND) {
         ySpeed = VERT_COLLISION_GRAVITY;
@@ -203,7 +211,7 @@ void Player::updateAnimation()
     lastAnimation = currentAnimation;
     lastSprite = currentSprite;
 
-    /*if (jumped) {
+    if (parachute) {
         if (currentAnimation < PARACHUTE_LEFT || currentAnimation > END_PARACHUTE_RIGHT) {
             if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_KNIFE_RIGHT) {
                 currentAnimation = PARACHUTE_RIGHT;
@@ -232,7 +240,7 @@ void Player::updateAnimation()
                 }
             }
         }
-    } else*/ if (shot) {
+    } else if (shot) {
         if (currentAnimation < SHOOT_LEFT || currentAnimation > END_SHOOT_RIGHT) {
             if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_KNIFE_RIGHT || currentAnimation == END_PARACHUTE_RIGHT) {
                 currentAnimation = SHOOT_RIGHT;
@@ -336,43 +344,45 @@ bool Player::updateCoordTracking()
 
     lastTracking = currentTracking;
 
+    //Special Cases
     if (lastAnimation == END_SHOOT_LEFT || lastAnimation == END_KNIFE_LEFT) {
         currentTracking = BOTTOM_RIGHT;
     } else if (lastAnimation == END_SHOOT_RIGHT || lastAnimation == END_KNIFE_RIGHT) {
         currentTracking = BOTTOM_LEFT;
-    } else
-    /*if (jumped) {
-        if (currentAnimation != END_PARACHUTE_RIGHT && currentAnimation != END_PARACHUTE_LEFT) {
-            if (currentAnimation >= PARACHUTE_RIGHT) {
-                //Parachuting Right
-                currentTracking = BOTTOM_RIGHT;
+    } else {
+        //Other Cases
+        if (parachute) {
+            if (currentAnimation != END_PARACHUTE_RIGHT && currentAnimation != END_PARACHUTE_LEFT) {
+                if (currentAnimation >= PARACHUTE_RIGHT) {
+                    //Parachuting Right
+                    currentTracking = BOTTOM_RIGHT;
+                } else {
+                    //Parachuting Left
+                    currentTracking = BOTTOM_LEFT;
+                }
             } else {
-                //Parachuting Left
+                //Last Parachute Animation Left Or Right
+                currentTracking = CENTER;
+            }
+        } else if (shot || knifed) {
+            if (currentAnimation >= KNIFE_RIGHT && currentAnimation <= END_KNIFE_RIGHT) {
+                //Knifing Right
                 currentTracking = BOTTOM_LEFT;
+            } else if (currentAnimation >= SHOOT_RIGHT && currentAnimation <= END_SHOOT_RIGHT) {
+                //Shooting Right
+                currentTracking = BOTTOM_LEFT;
+            } else {
+                //Knifing Or Shooting Left
+                currentTracking = BOTTOM_RIGHT;
             }
         } else {
-            //Track Center Bound For Last Animation Of Left And Right Parachute
-            currentTracking = CENTER;
-        }
-    } else*/ if (shot || knifed) {
-        if (currentAnimation >= KNIFE_RIGHT && currentAnimation <= END_KNIFE_RIGHT) {
-            //Knifing Right
-            currentTracking = BOTTOM_LEFT;
-        } else if (currentAnimation >= SHOOT_RIGHT && currentAnimation <= END_SHOOT_RIGHT) {
-            //Shooting Right
-            currentTracking = BOTTOM_LEFT;
-        } else {
-            //Knifing Or Shooting Left
-            currentTracking = BOTTOM_RIGHT;
-        }
-    } else {
-        //Running Or Standing
-        if ((currentAnimation >= RUN_RIGHT && currentAnimation <= END_RUN_RIGHT) || currentAnimation == STAND_RIGHT) {
-            //Standing Or Running Right
-            currentTracking = BOTTOM_RIGHT;
-        } else {
-            //Standing Or Running Left
-            currentTracking = BOTTOM_LEFT;
+            if ((currentAnimation >= RUN_RIGHT && currentAnimation <= END_RUN_RIGHT) || currentAnimation == STAND_RIGHT) {
+                //Standing Or Running Right
+                currentTracking = BOTTOM_RIGHT;
+            } else {
+                //Standing Or Running Left
+                currentTracking = BOTTOM_LEFT;
+            }
         }
     }
 

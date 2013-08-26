@@ -23,7 +23,7 @@ class Player
         //Causes the player to perform a knife melee attack
         void shoot();
         //Causes the player to shoot a projectile from the active gun
-        bool applySpeed(Level& currentLevel);
+        bool updatePlayer(Level& currentLevel);
         //Moves currentSprite based on xSpeed and ySpeed and updates it's animation
         //Returns true if the background needs to be scrolled
         bool updateProjectiles(Level& currentLevel);

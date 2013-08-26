@@ -60,7 +60,7 @@ class Level
         //Returns the converted value
 
         //Friends
-        friend bool Player::applySpeed(Level&);
+        friend bool Player::updatePlayer(Level&);
         friend bool Projectile::moveProjectiles(Level&, sf::FloatRect);
 
         Level::BoundType boundsCheck(sf::Sprite& entity, const bool vert);

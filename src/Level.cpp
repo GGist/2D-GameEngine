@@ -107,7 +107,7 @@ void Level::updateLevel(sf::FloatRect playerBound)
         }
 
         //Add New Tiles
-        while (!tileCoords.empty() && tileCoords.front().x - playerBound.left <= SCREEN_WIDTH ) {
+        while (!tileCoords.empty() && tileCoords.front().x - playerBound.left <= SCREEN_WIDTH) {
             tile.setPosition(tileCoords.front());
             activeTiles.push(tile);
             tileCoords.pop();
