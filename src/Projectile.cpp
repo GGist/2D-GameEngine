@@ -5,7 +5,7 @@ using namespace std;
 
 const string Projectile::SPRITE_MANIFEST("~Manifest.txt"), Projectile::SPRITE_PATH("data/projectiles/"), Projectile::SPRITE_FORMAT(".png");
 
-Projectile::Projectile() : numProjectiles(0), numDirections(0), test(0)
+Projectile::Projectile() : numProjectiles(0), numDirections(0)
 {
     ifstream projectileManifest;
     string fileName;

@@ -14,10 +14,18 @@ SFML 2.0 (or later) DLLs
 Some game data that I have not yet uploaded
 
 UPDATE LOG:
+V1.2:
++Retract animation for parachute
++Constants where literals were previously
+
 V1.1:
 +Deploy Parachute
 +updatePlayer() (previously named applySpeed())
 -applySpeed()
+Bugs:
++State of parachute is not preserved when shooting or knifing
+ mid air. Need to find a cleaner way of finding out whether sprite
+ is facing left or right.
 
 V1.0 (Initial Commit):
 Base Game

@@ -31,7 +31,6 @@ class Projectile
         //Functions
 
         //Data
-        int test;
         int numProjectiles, numDirections;
         std::vector<sf::Sprite> currentProjectiles;
         std::vector<bool> currentDirections;

@@ -3,10 +3,11 @@
 using namespace std;
 
 const sf::Vector2f Level::SCALE(1.2, 1.2);
+const string Level::TILE_NAME("Tile (14)"), Level::TILE_PATH("data/tiles/"), Level::TILE_FORMAT(".png"), Level::LEVEL_NAME("Coordinates.txt"), Level::LEVEL_PATH("data/");
 
 Level::Level(sf::Vector2f windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(windowRes.y), editingMode(false), tileCounter(0)
 {
-    tileTexture.loadFromFile("data/tiles/Tile (14).png");
+    tileTexture.loadFromFile(TILE_PATH + TILE_NAME + TILE_FORMAT);
     tile.setTexture(tileTexture);
 
     tile.scale(SCALE);
@@ -24,7 +25,7 @@ Level::~Level()
 
         numCoords = tileCoords.size();
 
-        outputFile.open("data/Coordinates.txt");
+        outputFile.open((LEVEL_PATH + LEVEL_NAME).c_str());
 
         for (int i = 0; i < numCoords - 1; i++) {
             outputFile << "(" << tileCoords.front().x << ", " << tileCoords.front().y << ")" << endl;
@@ -267,13 +268,11 @@ Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
 
         if (firstBound.intersects(tempBound)) {
             if (vert) {
-                //cout << "T";
                 difference = tempBound.top + tempBound.height;
                 difference -= entity.getGlobalBounds().top;
                 entity.move(0, difference);
                 intersects = TOP_BOUND;
             } else {
-                //cout << "L";
                 difference = tempBound.left + tempBound.width;
                 difference -= entity.getGlobalBounds().left;
                 entity.move(difference, 0);
@@ -281,13 +280,11 @@ Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
             }
         } else if (secondBound.intersects(tempBound)) {
             if (vert) {
-                //cout << "B";
                 difference = tempBound.top;
                 difference -= entity.getGlobalBounds().top + entity.getGlobalBounds().height;
                 entity.move(0, difference);
                 intersects = BOTTOM_BOUND;
             } else {
-                //cout << "R";
                 difference = tempBound.left;
                 difference -= entity.getGlobalBounds().left + entity.getGlobalBounds().width;
                 entity.move(difference, 0);
@@ -297,11 +294,6 @@ Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
             activeTiles.pop();
             activeTiles.push(tempSprite);
             tempSprite = activeTiles.front();
-            /*
-            tempVec = tileCoords.front();
-            tileCoords.pop();
-            tileCoords.push(tempVec);
-            */
         }
     }
 

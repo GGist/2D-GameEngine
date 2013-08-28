@@ -7,7 +7,8 @@ const string Player::SPRITE_MANIFEST("~Manifest.txt"), Player::SPRITE_PATH("data
 const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200, 200);
 
 Player::Player() : currentAnimation(STAND_RIGHT), lastAnimation(currentAnimation), currentTracking(BOTTOM_RIGHT), lastTracking(currentTracking),
-                   scrollOffset(DEFAULT_SCROLL), xSpeed(0), ySpeed(0), jumped(false), shot(false), knifed(false), falling(true), parachute(false)
+                   scrollOffset(DEFAULT_SCROLL), xSpeed(0), ySpeed(0), jumped(false), shot(false), knifed(false), falling(true), parachute(false),
+                   retract(false)
 {
     ifstream spriteManifest;
     string fileName;
@@ -60,19 +61,26 @@ void Player::deployParachute()
 {
     if (jumped || falling) {
         parachute = true;
+        retract = false;
     }
+}
+
+void Player::retractParachute()
+{
+    parachute = false;
+    retract = true;
 }
 
 void Player::knife()
 {
-    if (!knifed && !shot && !parachute) {
+    if (!shot && !parachute) {
         knifed = true;
     }
 }
 
 void Player::shoot()
 {
-    if (!shot && !knifed && !parachute) {
+    if (!knifed && !parachute) {
         shot = true;
     }
 }
@@ -83,19 +91,19 @@ bool Player::updatePlayer(Level& currentLevel)
     Level::BoundType vert, horiz;
 
     //Update Animation Immediately Or Wait
-    if (knifed || shot || parachute) {
-        //If Knifing Or Shooting
+    if (knifed || shot || parachute || retract) {
+        //If Knifing, Shooting, Or Parachuting
         updateAnimation();
         animationWait.restart();
     } else if (!jumped && currentAnimation >= PARACHUTE_LEFT && currentAnimation <= END_PARACHUTE_RIGHT) {
         //If Finished Jumping
         updateAnimation();
         animationWait.restart();
-    } else if (xSpeed > 0 && currentAnimation >= RUN_LEFT && currentAnimation < RUN_RIGHT || currentAnimation == STAND_LEFT ) {
+    } else if ((xSpeed > 0 && currentAnimation >= RUN_LEFT && currentAnimation < RUN_RIGHT) || currentAnimation == STAND_LEFT ) {
         //If Changing Direction From Left To Right
         updateAnimation();
         animationWait.restart();
-    } else if (xSpeed < 0 && currentAnimation >= RUN_RIGHT && currentAnimation < STAND_LEFT || currentAnimation == STAND_RIGHT) {
+    } else if ((xSpeed < 0 && currentAnimation >= RUN_RIGHT && currentAnimation < STAND_LEFT) || currentAnimation == STAND_RIGHT) {
         //If Changing Direction From Right To Left
         updateAnimation();
         animationWait.restart();
@@ -110,7 +118,7 @@ bool Player::updatePlayer(Level& currentLevel)
     //So That The Position Of A Sprite More Than One Iteration Old Is Not Used
     if (updatedAnimation) {
         translateCoords();
-        updateState();
+        updateAttackStates();
     }
 
     vert = currentLevel.boundsCheck(currentSprite, VERTICAL);
@@ -153,10 +161,14 @@ bool Player::updatePlayer(Level& currentLevel)
     currentLevel.boundsCheck(currentSprite, HORIZONTAL);
     vert = currentLevel.boundsCheck(currentSprite, VERTICAL);
 
+    //Update Movement States
     if (vert == Level::BOTTOM_BOUND) {
+        if (parachute) {
+            retract = true;
+            parachute = false;
+        }
         jumped = false;
         falling = false;
-        parachute = false;
         ySpeed = 0;
     } else if (vert == Level::TOP_BOUND) {
         ySpeed = VERT_COLLISION_GRAVITY;
@@ -178,7 +190,7 @@ bool Player::updateProjectiles(Level& currentLevel)
             startingX = currentSprite.getGlobalBounds().left + currentSprite.getGlobalBounds().width;
             shotRight = true;
         }
-        startingY = currentSprite.getGlobalBounds().top + 5;
+        startingY = currentSprite.getGlobalBounds().top + (currentSprite.getGlobalBounds().height * BULLET_SPAWN_FACTOR);
 
         currentProjectiles.addProjectile(sf::Vector2f(startingX, startingY), shotRight);
     }
@@ -211,43 +223,48 @@ void Player::updateAnimation()
     lastAnimation = currentAnimation;
     lastSprite = currentSprite;
 
-    if (parachute) {
+    if (parachute || retract) {
         if (currentAnimation < PARACHUTE_LEFT || currentAnimation > END_PARACHUTE_RIGHT) {
+            //Transition To First Parachute Animation
             if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_KNIFE_RIGHT) {
                 currentAnimation = PARACHUTE_RIGHT;
             } else {
                 currentAnimation = PARACHUTE_LEFT;
             }
         } else if (currentAnimation != END_PARACHUTE_LEFT && currentAnimation != END_PARACHUTE_RIGHT) {
+            //Transition From Left To Right Or Vice Versa While Still Advancing Animation
             if (xSpeed > 0 && currentAnimation >= PARACHUTE_LEFT && currentAnimation <= END_PARACHUTE_LEFT) {
-                currentIndex += 19;
+                currentIndex += PARACHUTE_LEFT_TO_RIGHT;
             } else if (xSpeed < 0 && currentAnimation >= PARACHUTE_RIGHT && currentAnimation <= END_PARACHUTE_RIGHT) {
-                currentIndex -= 17;
+                currentIndex += PARACHUTE_RIGHT_TO_LEFT;
             } else {
-                currentIndex++;
+                (parachute) ? currentIndex++ : currentIndex--;
             }
             currentAnimation = static_cast<PlayerAnimation>(currentIndex);
         } else {
-            if (xSpeed > 0) {
-                currentAnimation = END_PARACHUTE_RIGHT;
-            } else if (xSpeed < 0) {
-                currentAnimation = END_PARACHUTE_LEFT;
+            if (retract) {
+                //Start Retracting Parachute
+                currentIndex--;
+                currentAnimation = static_cast<PlayerAnimation>(currentIndex);
             } else {
-                if (currentAnimation == END_KNIFE_RIGHT - 1 || currentAnimation == END_PARACHUTE_RIGHT) {
+                //Transition Between The Left And Right Last Animation While In The Air
+                if (xSpeed > 0) {
                     currentAnimation = END_PARACHUTE_RIGHT;
-                } else {
+                } else if (xSpeed < 0) {
                     currentAnimation = END_PARACHUTE_LEFT;
-                }
+                } //Equal To Zero, Animation Stays The Same
             }
         }
     } else if (shot) {
         if (currentAnimation < SHOOT_LEFT || currentAnimation > END_SHOOT_RIGHT) {
-            if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_KNIFE_RIGHT || currentAnimation == END_PARACHUTE_RIGHT) {
+            //Transition To First Shoot Animation
+            if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_KNIFE_RIGHT || currentAnimation == END_PARACHUTE_RIGHT || currentAnimation == PARACHUTE_RIGHT) {
                 currentAnimation = SHOOT_RIGHT;
             } else {
                 currentAnimation = SHOOT_LEFT;
             }
         } else {
+            //Transition To First Animation Or Advance Animation
             if (lastAnimation == END_SHOOT_LEFT && xSpeed <= 0) {
                 currentAnimation = SHOOT_LEFT;
             } else if (lastAnimation == END_SHOOT_RIGHT && xSpeed >= 0) {
@@ -259,12 +276,14 @@ void Player::updateAnimation()
         }
     } else if (knifed) {
         if (currentAnimation < KNIFE_LEFT || currentAnimation > END_KNIFE_RIGHT) {
-            if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_PARACHUTE_RIGHT) {
+            //Transition To First Knife Animation
+            if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_PARACHUTE_RIGHT || currentAnimation == PARACHUTE_RIGHT) {
                 currentAnimation = KNIFE_RIGHT;
             } else {
                 currentAnimation = KNIFE_LEFT;
             }
         } else {
+            //Transition To First Animation Or Advance Animation
             if (lastAnimation == END_KNIFE_LEFT && xSpeed <= 0) {
                 currentAnimation = KNIFE_LEFT;
             } else if (lastAnimation == END_KNIFE_RIGHT && xSpeed >= 0) {
@@ -276,9 +295,11 @@ void Player::updateAnimation()
         }
     } else {
         if (xSpeed > 0) {
+            //Running Right
             if (currentAnimation < RUN_RIGHT || currentAnimation > END_RUN_RIGHT) {
                 currentAnimation = RUN_RIGHT;
             } else {
+                //Transition To First Animation Or Advance Animation
                 if (currentAnimation == END_RUN_RIGHT) {
                     currentAnimation = RUN_RIGHT;
                 } else {
@@ -287,9 +308,11 @@ void Player::updateAnimation()
                 }
             }
         } else if (xSpeed < 0) {
+            //Running Left
             if (currentAnimation < RUN_LEFT || currentAnimation > END_RUN_LEFT) {
                 currentAnimation = RUN_LEFT;
             } else {
+                //Transition To First Animation Or Advance Animation
                 if (currentAnimation == END_RUN_LEFT) {
                     currentAnimation = RUN_LEFT;
                 } else {
@@ -298,6 +321,7 @@ void Player::updateAnimation()
                 }
             }
         } else {
+            //Transition To Standing Position
             if ((currentTracking == BOTTOM_RIGHT && currentAnimation != END_KNIFE_LEFT && currentAnimation != END_SHOOT_LEFT && currentAnimation != STAND_LEFT)
                 || currentAnimation == END_PARACHUTE_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_KNIFE_RIGHT || currentAnimation == STAND_RIGHT) {
                 currentAnimation = STAND_RIGHT;
@@ -310,12 +334,14 @@ void Player::updateAnimation()
     currentSprite.setTexture(playerTextures[currentAnimation], true);
 }
 
-void Player::updateState()
+void Player::updateAttackStates()
 {
     if (currentAnimation == END_KNIFE_LEFT || currentAnimation == END_KNIFE_RIGHT) {
         knifed = false;
     } else if (currentAnimation == END_SHOOT_LEFT || currentAnimation == END_SHOOT_RIGHT) {
         shot = false;
+    } else if ((currentAnimation == PARACHUTE_LEFT || currentAnimation == PARACHUTE_RIGHT) && retract) {
+        retract = false;
     }
 }
 
@@ -351,7 +377,7 @@ bool Player::updateCoordTracking()
         currentTracking = BOTTOM_LEFT;
     } else {
         //Other Cases
-        if (parachute) {
+        if (parachute || retract) {
             if (currentAnimation != END_PARACHUTE_RIGHT && currentAnimation != END_PARACHUTE_LEFT) {
                 if (currentAnimation >= PARACHUTE_RIGHT) {
                     //Parachuting Right

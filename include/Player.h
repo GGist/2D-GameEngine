@@ -2,7 +2,6 @@
 #define PLAYER_H
 
 #include <Projectile.h>
-//#include <Vector>
 
 class Player
 {
@@ -19,6 +18,8 @@ class Player
         //Sets ySpeed equal to -JUMP_SPEED (making the sprite go up)
         void deployParachute();
         //Causes the player to deploy a parachute, slowing the falling speed
+        void retractParachute();
+        //Causes the player to retract the parachute, returning to normal falling speed
         void knife();
         //Causes the player to perform a knife melee attack
         void shoot();
@@ -40,8 +41,10 @@ class Player
     private:
         //Constants
         static const int NUM_ANIMATIONS = 108, DEFAULT_SCROLL = 512, WIDTH_CLIP = 25, RUN_SPEED = 6,
-                         JUMP_SPEED = -18, PARACHUTE_DEPLOY_SPEED = -9, GUNFIRE_FRAME = 5;
-        static constexpr float ANIMATION_DELAY = .06, ASCEND_GRAVITY = 0.5, DESCEND_GRAVITY = 0.18, VERT_COLLISION_GRAVITY = 1.5;
+                         JUMP_SPEED = -18, GUNFIRE_FRAME = 5, PARACHUTE_LEFT_TO_RIGHT = 19,
+                         PARACHUTE_RIGHT_TO_LEFT = -17;
+        static constexpr float ANIMATION_DELAY = .06, ASCEND_GRAVITY = 0.5, DESCEND_GRAVITY = 0.18, VERT_COLLISION_GRAVITY = 1.5,
+                                BULLET_SPAWN_FACTOR = 0.20;
         static constexpr bool VERTICAL = true, HORIZONTAL = false;
         static const sf::Vector2f SPRITE_SCALE, STARTING_POSITION;
         static const std::string SPRITE_MANIFEST, SPRITE_PATH, SPRITE_FORMAT;
@@ -75,8 +78,8 @@ class Player
         //Functions
         void updateAnimation();
         //Updates the currentSprite animation
-        void updateState();
-        //Update the binary states of the Player
+        void updateAttackStates();
+        //Update the shot and knifed states of the Player
         void translateCoords();
         //Translates lastSprite position to currentSprite position based on currentTracking
         bool updateCoordTracking();
@@ -89,7 +92,7 @@ class Player
         PlayerTracking currentTracking, lastTracking;
         float xCoord, yCoord, scrollOffset;
         float xSpeed, ySpeed;
-        bool jumped, shot, knifed, falling, parachute;
+        bool jumped, shot, knifed, falling, parachute, retract;
         sf::Texture playerTextures[NUM_ANIMATIONS];
         sf::Sprite currentSprite, lastSprite;
         sf::Clock animationWait;

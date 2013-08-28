@@ -38,6 +38,7 @@ class Level
         //Constants
         const int SCREEN_WIDTH, SCREEN_HEIGHT;
         static const sf::Vector2f SCALE;
+        static const std::string TILE_NAME, TILE_PATH, TILE_FORMAT, LEVEL_PATH, LEVEL_NAME;
         enum BoundType {
             TOP_BOUND,
             BOTTOM_BOUND,
@@ -70,7 +71,7 @@ class Level
 
         //Data
         bool editingMode;
-        int tileCounter;
+        size_t tileCounter;
         std::queue<sf::Sprite> activeTiles;
         std::queue<sf::Vector2f> tileCoords;
         sf::Texture tileTexture;
