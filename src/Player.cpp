@@ -3,32 +3,17 @@
 
 using namespace std;
 
-const string Player::SPRITE_MANIFEST("~Manifest.txt"), Player::SPRITE_PATH("data/sprites/"), Player::SPRITE_FORMAT(".png");
 const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200, 200);
 
-Player::Player() : currentAnimation(STAND_RIGHT), lastAnimation(currentAnimation), currentTracking(BOTTOM_RIGHT), lastTracking(currentTracking),
-                   scrollOffset(DEFAULT_SCROLL), xSpeed(0), ySpeed(0), jumped(false), shot(false), knifed(false), falling(true), parachute(false),
-                   retract(false)
+//Could Add A Factory For TextureManager/AnimCollection Classes Later
+Player::Player() : Character(new TextureManager(new PlayerAnim)), ySpeed(0), scrollOffset(DEFAULT_SCROLL),
+                   knifed(false), jumped(false), falling(false), parachute(false), retract(false)
 {
-    ifstream spriteManifest;
-    string fileName;
-    int animCount = 0;
+    tInterface->setTexture(PlayerAnim::STAND_RIGHT);
 
-    spriteManifest.open((SPRITE_PATH + SPRITE_MANIFEST).c_str());
-
-    while (spriteManifest >> fileName) {
-        playerTextures[animCount].loadFromFile(SPRITE_PATH + fileName + SPRITE_FORMAT);
-        animCount++;
-    }
-
-    spriteManifest.close();
-
+    currentSprite.setTexture(tInterface->getCurrentTexture(), true);
     currentSprite.setPosition(STARTING_POSITION);
-
-    currentSprite.setTexture(playerTextures[currentAnimation], true);
     currentSprite.setScale(SPRITE_SCALE);
-    lastSprite.setTexture(playerTextures[lastAnimation], true);
-    lastSprite.setScale(SPRITE_SCALE);
 
     xCoord = currentSprite.getGlobalBounds().left;
     yCoord = currentSprite.getGlobalBounds().top;
@@ -36,22 +21,23 @@ Player::Player() : currentAnimation(STAND_RIGHT), lastAnimation(currentAnimation
 
 Player::~Player()
 {
-    //dtor
+    if (tInterface != nullptr) {
+        delete tInterface;
+        tInterface = nullptr;
+    }
 }
 
-void Player::runRight()
+void Player::knife()
 {
-    xSpeed = RUN_SPEED;
-}
-
-void Player::runLeft()
-{
-    xSpeed = -RUN_SPEED;
+    if (!stateLock) {
+        knifed = true;
+        stateLock = true;
+    }
 }
 
 void Player::jump()
 {
-    if (!jumped && !parachute) {
+    if (!jumped) {
         ySpeed = JUMP_SPEED;
         jumped = true;
     }
@@ -59,68 +45,73 @@ void Player::jump()
 
 void Player::deployParachute()
 {
-    if (jumped || falling) {
+    if (!stateLock && jumped) {
         parachute = true;
+        stateLock = true;
         retract = false;
     }
 }
 
 void Player::retractParachute()
 {
-    parachute = false;
-    retract = true;
-}
-
-void Player::knife()
-{
-    if (!shot && !parachute) {
-        knifed = true;
+    if (parachute) {
+        parachute = false;
+        stateLock = false;
+        retract = true;
     }
 }
 
-void Player::shoot()
+bool Player::checkAnimation()
 {
-    if (!knifed && !parachute) {
-        shot = true;
+    if (tInterface == nullptr) {
+        return false;
     }
-}
 
-bool Player::updatePlayer(Level& currentLevel)
-{
-    bool scroll = false, updatedAnimation = true;
-    Level::BoundType vert, horiz;
+    int pAnim = tInterface->getCurrentAnimation();
+    bool updated;
 
     //Update Animation Immediately Or Wait
-    if (knifed || shot || parachute || retract) {
-        //If Knifing, Shooting, Or Parachuting
+    if (parachute || retract || knifed) {
         updateAnimation();
         animationWait.restart();
-    } else if (!jumped && currentAnimation >= PARACHUTE_LEFT && currentAnimation <= END_PARACHUTE_RIGHT) {
+
+        translateCoords();
+        updateState();
+    }  else if (!jumped && (pAnim == PlayerAnim::PARACHUTE_LEFT || pAnim == PlayerAnim::PARACHUTE_RIGHT)) {
         //If Finished Jumping
-        updateAnimation();
+        Character::updateAnimation();
         animationWait.restart();
-    } else if ((xSpeed > 0 && currentAnimation >= RUN_LEFT && currentAnimation < RUN_RIGHT) || currentAnimation == STAND_LEFT ) {
-        //If Changing Direction From Left To Right
-        updateAnimation();
-        animationWait.restart();
-    } else if ((xSpeed < 0 && currentAnimation >= RUN_RIGHT && currentAnimation < STAND_LEFT) || currentAnimation == STAND_RIGHT) {
-        //If Changing Direction From Right To Left
-        updateAnimation();
-        animationWait.restart();
-    } else if (animationWait.getElapsedTime().asSeconds() > ANIMATION_DELAY) {
+
+        translateCoords();
+        updateState();
+    } else {
+        //Other Cases
+        updated = Character::checkAnimation();
+    }
+
+    if (!updated && animationWait.getElapsedTime().asSeconds() > ANIMATION_DELAY) {
         //After ANIMATION_DELAY Update Looped Animation
         updateAnimation();
         animationWait.restart();
-    } else {
-        updatedAnimation = false;
-    }
 
-    //So That The Position Of A Sprite More Than One Iteration Old Is Not Used
-    if (updatedAnimation) {
         translateCoords();
-        updateAttackStates();
+        updateState();
     }
 
+    return true;
+}
+
+bool Player::applySpeed(Level& currentLevel)
+{
+    if (tInterface == nullptr) {
+        return false;
+    }
+
+    bool scroll = false;
+    Level::BoundType horiz, vert;
+
+
+    //Should Make Separate Functions For Checking Touched Bounds And Fixing Bounds In Future
     vert = currentLevel.boundsCheck(currentSprite, VERTICAL);
     //Handle Vertical Movement
     if ((vert == Level::NO_BOUND) || (vert == Level::TOP_BOUND && ySpeed >= 0) || (vert == Level::BOTTOM_BOUND)) {
@@ -139,7 +130,7 @@ bool Player::updatePlayer(Level& currentLevel)
     }
 
     horiz = currentLevel.boundsCheck(currentSprite, HORIZONTAL);
-    //Horizontal Movement
+    //Handle Horizontal Movement
     if ((horiz == Level::NO_BOUND) || (horiz == Level::RIGHT_BOUND && xSpeed < 0) || (horiz == Level::LEFT_BOUND && xSpeed > 0)) {
         if (xSpeed <= 0 && xCoord <= scrollOffset - DEFAULT_SCROLL) {
             //Left Side Of Screen
@@ -160,7 +151,6 @@ bool Player::updatePlayer(Level& currentLevel)
 
     currentLevel.boundsCheck(currentSprite, HORIZONTAL);
     vert = currentLevel.boundsCheck(currentSprite, VERTICAL);
-
     //Update Movement States
     if (vert == Level::BOTTOM_BOUND) {
         if (parachute) {
@@ -177,238 +167,124 @@ bool Player::updatePlayer(Level& currentLevel)
     return scroll;
 }
 
-bool Player::updateProjectiles(Level& currentLevel)
+int Player::getDefaultRunSpeed() const
 {
-    if (currentAnimation == SHOOT_LEFT + GUNFIRE_FRAME || currentAnimation == SHOOT_RIGHT + GUNFIRE_FRAME) {
-        int startingX, startingY;
-        bool shotRight;
-
-        if (currentAnimation == SHOOT_LEFT + GUNFIRE_FRAME) {
-            startingX = currentSprite.getGlobalBounds().left;
-            shotRight = false;
-        } else {
-            startingX = currentSprite.getGlobalBounds().left + currentSprite.getGlobalBounds().width;
-            shotRight = true;
-        }
-        startingY = currentSprite.getGlobalBounds().top + (currentSprite.getGlobalBounds().height * BULLET_SPAWN_FACTOR);
-
-        currentProjectiles.addProjectile(sf::Vector2f(startingX, startingY), shotRight);
-    }
-
-    if (currentProjectiles.moveProjectiles(currentLevel, currentSprite.getGlobalBounds())) {
-        return true;
-    }
-
-    return false;
-}
-
-const std::vector<sf::Sprite>& Player::getProjectiles() const
-{
-    return currentProjectiles.getProjectiles();
-}
-
-const sf::Sprite& Player::getSprite() const
-{
-    return currentSprite;
-}
-
-int Player::getRunSpeed() const
-{
-    return RUN_SPEED;
+    return DEFAULT_RUN_SPEED;
 }
 
 void Player::updateAnimation()
 {
-    int currentIndex = static_cast<int>(currentAnimation);
-    lastAnimation = currentAnimation;
-    lastSprite = currentSprite;
+    int cAnim = tInterface->getCurrentAnimation(),
+        cOff = tInterface->getCurrentOffset(),
+        cAnimIndex = tInterface->getBounds(cAnim).first + cOff;
+
+        lastSprite = currentSprite;
 
     if (parachute || retract) {
-        if (currentAnimation < PARACHUTE_LEFT || currentAnimation > END_PARACHUTE_RIGHT) {
-            //Transition To First Parachute Animation
-            if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_KNIFE_RIGHT) {
-                currentAnimation = PARACHUTE_RIGHT;
+            if (cAnim != PlayerAnim::PARACHUTE_LEFT && cAnim != PlayerAnim::PARACHUTE_RIGHT) {
+                if (facingRight) {
+                    tInterface->setTexture(PlayerAnim::PARACHUTE_RIGHT);
+                } else {
+                    tInterface->setTexture(PlayerAnim::PARACHUTE_LEFT);
+                }
+            } else if (cAnimIndex != tInterface->getBounds(cAnim).last) {
+                if (xSpeed > 0 && cAnim == PlayerAnim::PARACHUTE_LEFT) {
+                    tInterface->setTexture(PlayerAnim::PARACHUTE_RIGHT, ++cOff);
+                } else if (xSpeed < 0 && cAnim == PlayerAnim::PARACHUTE_RIGHT) {
+                    tInterface->setTexture(PlayerAnim::PARACHUTE_LEFT, ++cOff);
+                } else {
+                    (parachute) ? tInterface->setNextTexture() : tInterface->setTexture(cAnim, --cOff);
+                }
             } else {
-                currentAnimation = PARACHUTE_LEFT;
+                if (retract) {
+                    tInterface->setTexture(cAnim, --cOff);
+                } else {
+                    if (xSpeed > 0) {
+                        int lastOffset = tInterface->getBounds(PlayerAnim::PARACHUTE_RIGHT).last - tInterface->getBounds(PlayerAnim::PARACHUTE_RIGHT).first;
+                        tInterface->setTexture(PlayerAnim::PARACHUTE_RIGHT, lastOffset);
+                    } else if (xSpeed < 0) {
+                        int lastOffset = tInterface->getBounds(PlayerAnim::PARACHUTE_LEFT).last - tInterface->getBounds(PlayerAnim::PARACHUTE_LEFT).first;
+                        tInterface->setTexture(PlayerAnim::PARACHUTE_LEFT, lastOffset);
+                    }
+                }
             }
-        } else if (currentAnimation != END_PARACHUTE_LEFT && currentAnimation != END_PARACHUTE_RIGHT) {
-            //Transition From Left To Right Or Vice Versa While Still Advancing Animation
-            if (xSpeed > 0 && currentAnimation >= PARACHUTE_LEFT && currentAnimation <= END_PARACHUTE_LEFT) {
-                currentIndex += PARACHUTE_LEFT_TO_RIGHT;
-            } else if (xSpeed < 0 && currentAnimation >= PARACHUTE_RIGHT && currentAnimation <= END_PARACHUTE_RIGHT) {
-                currentIndex += PARACHUTE_RIGHT_TO_LEFT;
-            } else {
-                (parachute) ? currentIndex++ : currentIndex--;
-            }
-            currentAnimation = static_cast<PlayerAnimation>(currentIndex);
-        } else {
-            if (retract) {
-                //Start Retracting Parachute
-                currentIndex--;
-                currentAnimation = static_cast<PlayerAnimation>(currentIndex);
-            } else {
-                //Transition Between The Left And Right Last Animation While In The Air
-                if (xSpeed > 0) {
-                    currentAnimation = END_PARACHUTE_RIGHT;
-                } else if (xSpeed < 0) {
-                    currentAnimation = END_PARACHUTE_LEFT;
-                } //Equal To Zero, Animation Stays The Same
-            }
-        }
-    } else if (shot) {
-        if (currentAnimation < SHOOT_LEFT || currentAnimation > END_SHOOT_RIGHT) {
-            //Transition To First Shoot Animation
-            if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_KNIFE_RIGHT || currentAnimation == END_PARACHUTE_RIGHT || currentAnimation == PARACHUTE_RIGHT) {
-                currentAnimation = SHOOT_RIGHT;
-            } else {
-                currentAnimation = SHOOT_LEFT;
-            }
-        } else {
-            //Transition To First Animation Or Advance Animation
-            if (lastAnimation == END_SHOOT_LEFT && xSpeed <= 0) {
-                currentAnimation = SHOOT_LEFT;
-            } else if (lastAnimation == END_SHOOT_RIGHT && xSpeed >= 0) {
-                currentAnimation = SHOOT_RIGHT;
-            } else {
-                currentIndex++;
-                currentAnimation = static_cast<PlayerAnimation>(currentIndex);
-            }
-        }
     } else if (knifed) {
-        if (currentAnimation < KNIFE_LEFT || currentAnimation > END_KNIFE_RIGHT) {
-            //Transition To First Knife Animation
-            if (xSpeed > 0 || currentAnimation == STAND_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_PARACHUTE_RIGHT || currentAnimation == PARACHUTE_RIGHT) {
-                currentAnimation = KNIFE_RIGHT;
+        if (cAnim != PlayerAnim::KNIFE_LEFT && cAnim != PlayerAnim::KNIFE_RIGHT) {
+            if (facingRight) {
+                tInterface->setTexture(PlayerAnim::KNIFE_RIGHT);
             } else {
-                currentAnimation = KNIFE_LEFT;
+                tInterface->setTexture(PlayerAnim::KNIFE_LEFT);
             }
         } else {
-            //Transition To First Animation Or Advance Animation
-            if (lastAnimation == END_KNIFE_LEFT && xSpeed <= 0) {
-                currentAnimation = KNIFE_LEFT;
-            } else if (lastAnimation == END_KNIFE_RIGHT && xSpeed >= 0) {
-                currentAnimation = KNIFE_RIGHT;
+            if (tInterface->getBounds(cAnim).first + cOff == tInterface->getBounds(cAnim).last) {
+                if (facingRight) {
+                    tInterface->setTexture(PlayerAnim::KNIFE_RIGHT);
+                } else {
+                    tInterface->setTexture(PlayerAnim::KNIFE_LEFT);
+                }
             } else {
-                currentIndex++;
-                currentAnimation = static_cast<PlayerAnimation>(currentIndex);
+                tInterface->setNextTexture();
             }
         }
     } else {
-        if (xSpeed > 0) {
-            //Running Right
-            if (currentAnimation < RUN_RIGHT || currentAnimation > END_RUN_RIGHT) {
-                currentAnimation = RUN_RIGHT;
-            } else {
-                //Transition To First Animation Or Advance Animation
-                if (currentAnimation == END_RUN_RIGHT) {
-                    currentAnimation = RUN_RIGHT;
-                } else {
-                    currentIndex++;
-                    currentAnimation = static_cast<PlayerAnimation>(currentIndex);
-                }
-            }
-        } else if (xSpeed < 0) {
-            //Running Left
-            if (currentAnimation < RUN_LEFT || currentAnimation > END_RUN_LEFT) {
-                currentAnimation = RUN_LEFT;
-            } else {
-                //Transition To First Animation Or Advance Animation
-                if (currentAnimation == END_RUN_LEFT) {
-                    currentAnimation = RUN_LEFT;
-                } else {
-                    currentIndex++;
-                    currentAnimation = static_cast<PlayerAnimation>(currentIndex);
-                }
-            }
-        } else {
-            //Transition To Standing Position
-            if ((currentTracking == BOTTOM_RIGHT && currentAnimation != END_KNIFE_LEFT && currentAnimation != END_SHOOT_LEFT && currentAnimation != STAND_LEFT)
-                || currentAnimation == END_PARACHUTE_RIGHT || currentAnimation == END_SHOOT_RIGHT || currentAnimation == END_KNIFE_RIGHT || currentAnimation == STAND_RIGHT) {
-                currentAnimation = STAND_RIGHT;
-            } else {
-                currentAnimation = STAND_LEFT;
-            }
-        }
+        Character::updateAnimation();
     }
 
-    currentSprite.setTexture(playerTextures[currentAnimation], true);
+    currentSprite.setTexture(tInterface->getCurrentTexture(), true);
 }
 
-void Player::updateAttackStates()
+void Player::updateState()
 {
-    if (currentAnimation == END_KNIFE_LEFT || currentAnimation == END_KNIFE_RIGHT) {
-        knifed = false;
-    } else if (currentAnimation == END_SHOOT_LEFT || currentAnimation == END_SHOOT_RIGHT) {
-        shot = false;
-    } else if ((currentAnimation == PARACHUTE_LEFT || currentAnimation == PARACHUTE_RIGHT) && retract) {
+    int cAnimIndex = tInterface->getBounds(tInterface->getCurrentAnimation()).first + tInterface->getCurrentOffset();
+
+    if (retract && cAnimIndex == tInterface->getBounds(tInterface->getCurrentAnimation()).first) {
         retract = false;
-    }
-}
-
-void Player::translateCoords()
-{
-    //Check If/Where To Track Sprite So It Does Not Have Placement Issues
-    if (updateCoordTracking()) {
-        if (currentTracking == BOTTOM_LEFT) {
-            xCoord = (lastSprite.getGlobalBounds().left);
-            yCoord = (lastSprite.getGlobalBounds().top + lastSprite.getGlobalBounds().height) - currentSprite.getGlobalBounds().height;
-        } else if (currentTracking == CENTER) {
-            xCoord = (lastSprite.getGlobalBounds().left + (lastSprite.getGlobalBounds().width / 2)) - currentSprite.getGlobalBounds().width / 2;
-            yCoord = (lastSprite.getGlobalBounds().top + (lastSprite.getGlobalBounds().height / 2)) - currentSprite.getGlobalBounds().height / 2;
-        } else {
-            xCoord = (lastSprite.getGlobalBounds().left + lastSprite.getGlobalBounds().width) - currentSprite.getGlobalBounds().width;
-            yCoord = (lastSprite.getGlobalBounds().top + lastSprite.getGlobalBounds().height) - currentSprite.getGlobalBounds().height;
-        }
+        stateLock = false;
+    } else if (knifed && cAnimIndex == tInterface->getBounds(tInterface->getCurrentAnimation()).last) {
+        knifed = false;
+        stateLock = false;
+    } else {
+        //Check Other Cases
+        Character::updateState();
     }
 }
 
 bool Player::updateCoordTracking()
 {
-    if (lastAnimation == currentAnimation) {
+    int cAnimIndex = tInterface->getBounds(tInterface->getCurrentAnimation()).first + tInterface->getCurrentOffset();
+    int lAnimIndex = tInterface->getBounds(tInterface->getLastAnimation()).first + tInterface->getLastOffset();
+
+    if (cAnimIndex == lAnimIndex) {
         return false;
     }
 
     lastTracking = currentTracking;
 
     //Special Cases
-    if (lastAnimation == END_SHOOT_LEFT || lastAnimation == END_KNIFE_LEFT) {
+    if (lAnimIndex == tInterface->getBounds(PlayerAnim::KNIFE_LEFT).last) {
         currentTracking = BOTTOM_RIGHT;
-    } else if (lastAnimation == END_SHOOT_RIGHT || lastAnimation == END_KNIFE_RIGHT) {
+    } else if (lAnimIndex == tInterface->getBounds(PlayerAnim::KNIFE_RIGHT).last) {
         currentTracking = BOTTOM_LEFT;
     } else {
         //Other Cases
         if (parachute || retract) {
-            if (currentAnimation != END_PARACHUTE_RIGHT && currentAnimation != END_PARACHUTE_LEFT) {
-                if (currentAnimation >= PARACHUTE_RIGHT) {
-                    //Parachuting Right
+            if (cAnimIndex != tInterface->getBounds(PlayerAnim::PARACHUTE_RIGHT).last && cAnimIndex != tInterface->getBounds(PlayerAnim::PARACHUTE_LEFT).last) {
+                if (facingRight) {
                     currentTracking = BOTTOM_RIGHT;
                 } else {
-                    //Parachuting Left
                     currentTracking = BOTTOM_LEFT;
                 }
             } else {
-                //Last Parachute Animation Left Or Right
                 currentTracking = CENTER;
             }
-        } else if (shot || knifed) {
-            if (currentAnimation >= KNIFE_RIGHT && currentAnimation <= END_KNIFE_RIGHT) {
-                //Knifing Right
-                currentTracking = BOTTOM_LEFT;
-            } else if (currentAnimation >= SHOOT_RIGHT && currentAnimation <= END_SHOOT_RIGHT) {
-                //Shooting Right
+        } else if (knifed) {
+            if (facingRight) {
                 currentTracking = BOTTOM_LEFT;
             } else {
-                //Knifing Or Shooting Left
                 currentTracking = BOTTOM_RIGHT;
             }
         } else {
-            if ((currentAnimation >= RUN_RIGHT && currentAnimation <= END_RUN_RIGHT) || currentAnimation == STAND_RIGHT) {
-                //Standing Or Running Right
-                currentTracking = BOTTOM_RIGHT;
-            } else {
-                //Standing Or Running Left
-                currentTracking = BOTTOM_LEFT;
-            }
+            return Character::updateCoordTracking();
         }
     }
 

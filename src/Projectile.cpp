@@ -3,7 +3,7 @@
 
 using namespace std;
 
-const string Projectile::SPRITE_MANIFEST("~Manifest.txt"), Projectile::SPRITE_PATH("data/projectiles/"), Projectile::SPRITE_FORMAT(".png");
+const string Projectile::SPRITE_MANIFEST("~Manifest.txt"), Projectile::SPRITE_PATH("res/projectiles/"), Projectile::SPRITE_FORMAT(".png");
 
 Projectile::Projectile() : numProjectiles(0), numDirections(0)
 {

@@ -1,3 +1,7 @@
+/***********************************************************************************
+
+***********************************************************************************/
+
 #ifndef LEVEL_H
 #define LEVEL_H
 
@@ -33,12 +37,6 @@ class Level
         const sf::Sprite& getTile() const;
         //Returns the Sprite tile
 
-    protected:
-    private:
-        //Constants
-        const int SCREEN_WIDTH, SCREEN_HEIGHT;
-        static const sf::Vector2f SCALE;
-        static const std::string TILE_NAME, TILE_PATH, TILE_FORMAT, LEVEL_PATH, LEVEL_NAME;
         enum BoundType {
             TOP_BOUND,
             BOTTOM_BOUND,
@@ -46,6 +44,16 @@ class Level
             RIGHT_BOUND,
             NO_BOUND
         };
+        Level::BoundType boundsCheck(sf::Sprite& entity, const bool vert);
+        //Checks the sprite against the tileCoords
+        //Returns false if the sprite is not hitting any tiles
+
+    protected:
+    private:
+        //Constants
+        const int SCREEN_WIDTH, SCREEN_HEIGHT;
+        static const sf::Vector2f SCALE;
+        static const std::string TILE_NAME, TILE_PATH, TILE_FORMAT, LEVEL_PATH, LEVEL_NAME;
 
         //Functions
         bool sortTileQueue();
@@ -59,15 +67,6 @@ class Level
         T stringToType(std::string convert);
         //Converts a string to the type specified
         //Returns the converted value
-
-        //Friends
-        friend bool Player::updatePlayer(Level&);
-        friend bool Projectile::moveProjectiles(Level&, sf::FloatRect);
-
-        Level::BoundType boundsCheck(sf::Sprite& entity, const bool vert);
-        //USED BY FRIEND FUNCTIONS ONLY
-        //Checks the hero against the tileCoords
-        //Returns false if the player is not hitting any tiles
 
         //Data
         bool editingMode;

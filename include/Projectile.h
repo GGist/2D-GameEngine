@@ -22,7 +22,7 @@ class Projectile
         //Returns true if there are any active projectiles
         const std::vector<sf::Sprite>& getProjectiles() const;
         //Returns the currentProjectile
-    protected:
+
     private:
         //Constants
         static const int NUM_ANIMATIONS = 4, SPEED = 10, SCALE = 4, SCREEN_WIDTH = 1280;

@@ -3,7 +3,7 @@
 using namespace std;
 
 const sf::Vector2f Level::SCALE(1.2, 1.2);
-const string Level::TILE_NAME("Tile (14)"), Level::TILE_PATH("data/tiles/"), Level::TILE_FORMAT(".png"), Level::LEVEL_NAME("Coordinates.txt"), Level::LEVEL_PATH("data/");
+const string Level::TILE_NAME("Tile (14)"), Level::TILE_PATH("res/tiles/"), Level::TILE_FORMAT(".png"), Level::LEVEL_NAME("Coordinates.txt"), Level::LEVEL_PATH("res/tiles/");
 
 Level::Level(sf::Vector2f windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(windowRes.y), editingMode(false), tileCounter(0)
 {
@@ -72,6 +72,9 @@ void Level::clearLevel()
 {
     while (!tileCoords.empty()) {
         tileCoords.pop();
+    }
+    while (!activeTiles.empty()) {
+        activeTiles.pop();
     }
 }
 
