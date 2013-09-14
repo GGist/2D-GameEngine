@@ -14,6 +14,13 @@ SFML 2.0 (or later) DLLs
 Some game data that I have not yet uploaded
 
 UPDATE LOG:
+V1.5:
++Refactored most of the code base to be more extensible
+ when it comes to adding animations and loading them
+ in as textures
+ +AnimCollection class
+ +TexutreManager class
+ 
 V1.2:
 +Retract Parachute
 +Constants where literals were previously
