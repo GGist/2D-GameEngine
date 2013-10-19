@@ -1,4 +1,5 @@
 DESCRIPTION:
+=====
 This is a simple 2-D sidescroller/shooter game that I developed using SFML. This is my firstish game (refactored this
 one completelty) that I have done and I did not want to compromise and make the game itself simple because of a lack
 of code depth.
