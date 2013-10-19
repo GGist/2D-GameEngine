@@ -14,15 +14,15 @@ class Character
 {
     public:
         Character(TextureManager* tManager);
-        //Constructor
         virtual ~Character();
-        //Destructor
         void runRight();
         //Sets xSpeed equal to RUN_SPEED
         void runLeft();
         //Sets xSpeed equal to -RUN_SPEED
         void shoot();
         //Causes the player to shoot a projectile from the active gun
+        bool isDead();
+        //Returns true if the character is dead
         bool updateProjectiles(Level& currentLevel);
         //Moves the active projectiles based on their velocity and checks for collisions
         //Returns true if there is at least one active projectile
@@ -59,17 +59,19 @@ class Character
         virtual bool updateCoordTracking();
         //Updates the tracking bools used to determine where to track currentSprite
         //Returns true if the xCoord and yCoord need to be updated
+        virtual bool checkForDeath() = 0;
+        //Checks if the character should be dead or not
 
         //Data
         TextureManager* tInterface;
         CharTracking currentTracking, lastTracking;
         float xCoord, yCoord, xSpeed, speedModifier;
-        bool shot, facingRight, stateLock;
+        bool shot, died, facingRight, stateLock;
         sf::Sprite currentSprite, lastSprite;
         sf::Clock animationWait;
 
     private:
-        const int GUNFIRE_OFFSET = 5, BULLET_SPAWN_OFFSET_FACTOR = 0.20;
+        const int GUNFIRE_OFFSET = 5, BULLET_SPAWN_OFFSET_FACTOR = 0.10;
 
         virtual int getDefaultRunSpeed() const = 0;
         //Returns a default run speed constant

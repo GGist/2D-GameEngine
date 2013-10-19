@@ -15,7 +15,7 @@ class TextureManager
         bool setTexture(const int anim, const int offset = 0);
         //Sets the current texture to the texture of the specified animation
         //with an optional offset that is past the first texture of the animation
-        //Returns false if the specified animation or offset is a of bounds
+        //Returns false if the specified animation or offset is out of bounds
         bool setNextTexture();
         //Sets the current texture to the next texture in the animation
         //Returns false if the current texture is the last one in the animation

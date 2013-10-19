@@ -6,8 +6,8 @@ using namespace std;
 const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200, 200);
 
 //Could Add A Factory For TextureManager/AnimCollection Classes Later
-Player::Player() : Character(new TextureManager(new PlayerAnim)), ySpeed(0), scrollOffset(DEFAULT_SCROLL),
-                   knifed(false), jumped(false), falling(false), parachute(false), retract(false)
+Player::Player(sf::Vector2i windowBounds) : Character(new TextureManager(new PlayerAnim)), wBounds(sf::Vector2i(0, 0), windowBounds), ySpeed(0),
+                   scrollOffset(DEFAULT_SCROLL), knifed(false), jumped(false), falling(false), parachute(false), retract(false)
 {
     tInterface->setTexture(PlayerAnim::STAND_RIGHT);
 
@@ -164,6 +164,8 @@ bool Player::applySpeed(Level& currentLevel)
         ySpeed = VERT_COLLISION_GRAVITY;
     }
 
+    checkForDeath();
+
     return scroll;
 }
 
@@ -289,4 +291,13 @@ bool Player::updateCoordTracking()
     }
 
     return true;
+}
+
+bool Player::checkForDeath()
+{
+    if (getSprite().getGlobalBounds().top > wBounds.top + wBounds.height) {
+        died = true;
+    } //else if {
+        //Shot
+    //}
 }

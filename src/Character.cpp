@@ -4,7 +4,7 @@
 using namespace std;
 
 Character::Character(TextureManager* tManager) : tInterface(tManager), currentProjectiles(), currentTracking(BOTTOM_RIGHT), lastTracking(BOTTOM_RIGHT),
-                                                 shot(false), facingRight(true), stateLock(false), xCoord(0), yCoord(0), xSpeed(0), speedModifier(0),
+                                                 shot(false), died(false), facingRight(true), stateLock(false), xCoord(0), yCoord(0), xSpeed(0), speedModifier(0),
                                                  currentSprite(), lastSprite()
 {
 
@@ -33,6 +33,11 @@ void Character::shoot()
         shot = true;
         stateLock = true;
     }
+}
+
+bool Character::isDead()
+{
+    return died;
 }
 
 bool Character::updateProjectiles(Level& currentLevel)

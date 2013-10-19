@@ -10,10 +10,8 @@
 class Player : public Character
 {
     public:
-        Player();
-        //Constructor
+        Player(sf::Vector2i windowBounds);
         virtual ~Player();
-        //Destructor
         void knife();
         //Causes the player to perform a knife melee attack
         void jump();
@@ -47,11 +45,13 @@ class Player : public Character
         virtual bool updateCoordTracking();
         //Updates the tracking bools used to determine where to track currentSprite
         //Returns true if the xCoord and yCoord need to be updated
+        virtual bool checkForDeath();
+        //Checks if the character should be dead or not
 
         //Data
         float ySpeed, scrollOffset;
         bool knifed, jumped, falling, parachute, retract;
-
+        sf::IntRect wBounds;
 };
 
 #endif // HERO_H

@@ -8,7 +8,9 @@ TextureManager::TextureManager(CharAnim* animations) : textures(animations), tex
 
 TextureManager::~TextureManager()
 {
-
+    if (textures != NULL) {
+        delete textures;
+    }
 }
 
 bool TextureManager::setTexture(const int anim, const int offset)
