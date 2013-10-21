@@ -30,7 +30,7 @@ Update Log:
 +Changed some file names to be more descriptive
 +Rolled back version numbers to show that the game is not
  readily playable<br \>
-**Temporary Fix**<br \>
+**Temporary Fix:**<br \>
 +When shooting one way and running the other the player tracking
 gets updated when it shouldnt<br \>
  +Temporary fix to not update facingRight in runRight() or runLeft() 
