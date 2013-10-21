@@ -5,8 +5,8 @@ using namespace std;
 
 const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200, 200);
 
-//Could Add A Factory For TextureManager/AnimCollection Classes Later
-Player::Player(sf::Vector2i windowBounds) : Character(new TextureManager(new PlayerAnim)), wBounds(sf::Vector2i(0, 0), windowBounds), ySpeed(0),
+//Could Add A Factory For AnimationManager/Animation Classes Later
+Player::Player(sf::Vector2i windowBounds) : Character(new AnimationManager(new PlayerAnim)), wBounds(sf::Vector2i(0, 0), windowBounds), ySpeed(0),
                    scrollOffset(DEFAULT_SCROLL), knifed(false), jumped(false), falling(false), parachute(false), retract(false)
 {
     tInterface->setTexture(PlayerAnim::STAND_RIGHT);
@@ -68,7 +68,7 @@ bool Player::checkAnimation()
     }
 
     int pAnim = tInterface->getCurrentAnimation();
-    bool updated;
+    bool updatedInChar;
 
     //Update Animation Immediately Or Wait
     if (parachute || retract || knifed) {
@@ -86,10 +86,10 @@ bool Player::checkAnimation()
         updateState();
     } else {
         //Other Cases
-        updated = Character::checkAnimation();
+        updatedInChar = Character::checkAnimation();
     }
 
-    if (!updated && animationWait.getElapsedTime().asSeconds() > ANIMATION_DELAY) {
+    if (!updatedInChar && animationWait.getElapsedTime().asSeconds() > ANIMATION_DELAY) {
         //After ANIMATION_DELAY Update Looped Animation
         updateAnimation();
         animationWait.restart();
@@ -298,6 +298,6 @@ bool Player::checkForDeath()
     if (getSprite().getGlobalBounds().top > wBounds.top + wBounds.height) {
         died = true;
     } //else if {
-        //Shot
+        //Got Shot
     //}
 }

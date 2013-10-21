@@ -23,18 +23,28 @@ Controls:
 Required DLLs:
 --------------
 SFML 2.0 (or later) DLLs<br \>
-Some game data that I have not yet uploaded<br \>
 
 Update Log:
 -----------
-**V1.5:**<br \>
+**V0.6**<br \>
++Changed some file names to be more descriptive
++Rolled back version numbers to show that the game is not
+ readily playable
+**Temporary Fix**<br \>
++When shooting one way and running the other the player tracking
+gets updated when it shouldnt<br \>
+ +Temporary fix to not update facingRight in runRight() or runLeft() 
+ if shot, should find a better way to check if facingRight should be 
+ updated
+
+**V0.5:**<br \>
 +Refactored most of the code base to be more extensible
  when it comes to adding animations and loading them
  in as textures<br \>
  +AnimCollection class<br \>
  +TexutreManager class
  
-**V1.2:**<br \>
+**V0.2:**<br \>
 +Retract Parachute<br \>
 +Constants where literals were previously<br \>
 **Bugs:**<br \>
@@ -42,12 +52,12 @@ Update Log:
  mid air. Need to find a cleaner way of finding out whether sprite
  is facing left or right.<br \>
 
-**V1.1:**<br \>
+**V0.1:**<br \>
 +Deploy Parachute<br \>
 +updatePlayer() (previously named applySpeed())<br \>
 -applySpeed()<br \>
 
-**V1.0 (Initial Commit):**<br \>
+**V0 (Initial Commit):**<br \>
 +Character movement<br \>
 +Character knifing and shooting<br \>
 +Bullets(Projectiles) with animation<br \>

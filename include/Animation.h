@@ -2,8 +2,8 @@
 
 ***********************************************************************************/
 
-#ifndef ANIMCOLLECTION_H
-#define ANIMCOLLECTION_H
+#ifndef ANIMATION_H
+#define ANIMATION_H
 
 #include <iostream>
 #include <SFML/Graphics.hpp>
@@ -66,4 +66,4 @@ public:
     static const int PARACHUTE_RIGHT = 9;
 };
 
-#endif // ANIMCOLLECTION_H
+#endif // ANIMATION_H

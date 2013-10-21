@@ -2,16 +2,16 @@
 
 ***********************************************************************************/
 
-#ifndef TEXTUREMANAGER_H
-#define TEXTUREMANAGER_H
+#ifndef AnimationManager_H
+#define AnimationManager_H
 
-#include <AnimCollection.h>
+#include <Animation.h>
 
-class TextureManager
+class AnimationManager
 {
     public:
-        TextureManager(CharAnim* animations);
-        virtual ~TextureManager();
+        AnimationManager(CharAnim* animations);
+        virtual ~AnimationManager();
         bool setTexture(const int anim, const int offset = 0);
         //Sets the current texture to the texture of the specified animation
         //with an optional offset that is past the first texture of the animation
@@ -52,4 +52,4 @@ class TextureManager
         int currentOffset, lastOffset;
 };
 
-#endif // TEXTUREMANAGER_H
+#endif // AnimationManager_H

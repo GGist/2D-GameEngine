@@ -6,7 +6,7 @@
 using namespace std;
 
 const int X_RES = 1280, Y_RES = 720, FPS = 60, ICON_X_SIZE = 48, ICON_Y_SIZE = 63, BOUNDS_THICKNESS = 3;
-const string WINDOW_TITLE = "Second Game", WINDOW_ICON = "res/icon.png", LEVEL_BACKGROUND = "res/backgrounds/level_background.png", LEVEL_DATA = "res/tiles/Coordinates.txt";
+const string WINDOW_TITLE = "SFML-Shooter", WINDOW_ICON = "res/icon.png", LEVEL_BACKGROUND = "res/backgrounds/level_background.png", LEVEL_DATA = "res/tiles/Coordinates.txt";
 const bool SHOW_PLAYER_BOUNDS = false;
 
 void frameLimiter(sf::Time previousTime);
@@ -31,7 +31,6 @@ int main()
     icon.loadFromFile(WINDOW_ICON);
     mainWindow.setIcon(ICON_X_SIZE, ICON_Y_SIZE, icon.getPixelsPtr());
     mainWindow.setVisible(false);
-    mainWindow.setFramerateLimit(FPS);
     //Scroll Settings
     sf::View mainWindowScroll(sf::FloatRect(0, 0, X_RES, Y_RES));
     //Background Settings
@@ -174,7 +173,7 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
     level.loadLevel(LEVEL_DATA);
 
     while (window.isOpen()) {
-        //frameLimiter(timeStep.getElapsedTime());
+        frameLimiter(timeStep.getElapsedTime());
         timeStep.restart();
         while (window.pollEvent(mainEvent)) {
             switch (mainEvent.type) {

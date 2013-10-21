@@ -6,14 +6,14 @@
 #define CHARACTER_H
 
 #include <Projectile.h>
-#include <TextureManager.h>
+#include <AnimationManager.h>
 
 class Level;
 
 class Character
 {
     public:
-        Character(TextureManager* tManager);
+        Character(AnimationManager* tManager);
         virtual ~Character();
         void runRight();
         //Sets xSpeed equal to RUN_SPEED
@@ -63,7 +63,7 @@ class Character
         //Checks if the character should be dead or not
 
         //Data
-        TextureManager* tInterface;
+        AnimationManager* tInterface;
         CharTracking currentTracking, lastTracking;
         float xCoord, yCoord, xSpeed, speedModifier;
         bool shot, died, facingRight, stateLock;

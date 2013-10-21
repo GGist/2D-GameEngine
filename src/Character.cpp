@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Character::Character(TextureManager* tManager) : tInterface(tManager), currentProjectiles(), currentTracking(BOTTOM_RIGHT), lastTracking(BOTTOM_RIGHT),
+Character::Character(AnimationManager* tManager) : tInterface(tManager), currentProjectiles(), currentTracking(BOTTOM_RIGHT), lastTracking(BOTTOM_RIGHT),
                                                  shot(false), died(false), facingRight(true), stateLock(false), xCoord(0), yCoord(0), xSpeed(0), speedModifier(0),
                                                  currentSprite(), lastSprite()
 {
@@ -18,13 +18,15 @@ Character::~Character()
 void Character::runRight()
 {
     xSpeed = getDefaultRunSpeed() + speedModifier;
-    facingRight = true;
+    if (!shot)
+        facingRight = true;
 }
 
 void Character::runLeft()
 {
     xSpeed = -getDefaultRunSpeed() - speedModifier;
-    facingRight = false;
+    if (!shot)
+        facingRight = false;
 }
 
 void Character::shoot()

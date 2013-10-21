@@ -1,4 +1,4 @@
-#include "AnimCollection.h"
+#include "Animation.h"
 
 //Base Class
 
