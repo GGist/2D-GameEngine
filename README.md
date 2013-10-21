@@ -26,7 +26,7 @@ SFML 2.0 (or later) DLLs<br \>
 
 Update Log:
 -----------
-**V0.6**<br \>
+**V0.6:**<br \>
 +Changed some file names to be more descriptive
 +Rolled back version numbers to show that the game is not
  readily playable<br \>
