@@ -2,14 +2,14 @@
 
 //Base Class
 
-const std::string CharAnim::PATH("res/anims/"), CharAnim::MANIFEST("~Manifest.txt"), CharAnim::FORMAT(".png");
+const std::string CharacterAnim::PATH("res/anims/"), CharacterAnim::MANIFEST("~Manifest.txt"), CharacterAnim::FORMAT(".png");
 
-CharAnim::CharAnim()
+CharacterAnim::CharacterAnim()
 {
     loadTextures(PATH, MANIFEST, FORMAT);
 }
 
-void CharAnim::loadTextures(const std::string& path, const std::string& manifest, const std::string& format)
+void CharacterAnim::loadTextures(const std::string& path, const std::string& manifest, const std::string& format)
 {
     std::ifstream textureManifest;
     std::string currentFileName, lastFileName = " ";
@@ -47,12 +47,12 @@ void CharAnim::loadTextures(const std::string& path, const std::string& manifest
     textureManifest.close();
 }
 
-const std::vector<AnimBound>& CharAnim::getTextureBounds()
+const std::vector<AnimBound>& CharacterAnim::getTextureBounds()
 {
     return textureBounds;
 }
 
-const std::vector<sf::Texture>& CharAnim::getLoadedTextures()
+const std::vector<sf::Texture>& CharacterAnim::getLoadedTextures()
 {
     return loadedTextures;
 }
@@ -61,7 +61,7 @@ const std::vector<sf::Texture>& CharAnim::getLoadedTextures()
 
 const std::string PlayerAnim::PATH("res/anims/player/"), PlayerAnim::MANIFEST("~Manifest.txt"), PlayerAnim::FORMAT(".png");
 
-PlayerAnim::PlayerAnim() : CharAnim()
+PlayerAnim::PlayerAnim() : CharacterAnim()
 {
     loadTextures(PATH, MANIFEST, FORMAT);
 }

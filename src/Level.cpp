@@ -80,12 +80,12 @@ void Level::clearLevel()
 
 bool Level::setEditorMode(bool mode)
 {
-    if (tileCoords.empty()) {
-        editingMode = mode;
-        return true;
-    }
+    if (!tileCoords.empty() || !activeTiles.empty())
+        return false;
 
-    return false;
+    editingMode = mode;
+
+    return true;
 }
 
 bool Level::addTile(sf::Vector2f coord)
@@ -240,6 +240,8 @@ Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
     sf::FloatRect firstBound, secondBound, tempBound;
 
     //Setup Entity Bounds
+    //The constant multiples are to give the bounds some buffer from the edges of the bounds so that,
+    //for example, a BoundType::BOTTOM_BOUND doesnt trigger when running into a wall on the right
     if (vert) {
         //Top Bound
         firstBound.left = entity.getGlobalBounds().left + (entity.getGlobalBounds().width * .10);
@@ -300,7 +302,7 @@ Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
         }
     }
 
-    //Preserve The Ordering Of activeTiles Before Checking Bounds
+    //Preserve The Ordering Of activeTiles Before They Were Checked
     for (int i = 0; i < queueSize - loopCount; i++) {
         tempSprite = activeTiles.front();
         activeTiles.pop();

@@ -3,7 +3,7 @@
 
 using namespace std;
 
-Character::Character(AnimationManager* tManager) : tInterface(tManager), currentProjectiles(), currentTracking(BOTTOM_RIGHT), lastTracking(BOTTOM_RIGHT),
+Character::Character(AnimationManager* tManager) : tInterface(tManager), pActive(), currentTracking(BOTTOM_RIGHT), lastTracking(BOTTOM_RIGHT),
                                                  shot(false), died(false), facingRight(true), stateLock(false), xCoord(0), yCoord(0), xSpeed(0), speedModifier(0),
                                                  currentSprite(), lastSprite()
 {
@@ -18,15 +18,13 @@ Character::~Character()
 void Character::runRight()
 {
     xSpeed = getDefaultRunSpeed() + speedModifier;
-    if (!shot)
-        facingRight = true;
+    facingRight = true;
 }
 
 void Character::runLeft()
 {
     xSpeed = -getDefaultRunSpeed() - speedModifier;
-    if (!shot)
-        facingRight = false;
+    facingRight = false;
 }
 
 void Character::shoot()
@@ -52,7 +50,7 @@ bool Character::updateProjectiles(Level& currentLevel)
         int startingX, startingY;
         bool shotRight;
 
-        if (tInterface->getCurrentAnimation() == CharAnim::SHOOT_LEFT) {
+        if (tInterface->getCurrentAnimation() == CharacterAnim::SHOOT_LEFT) {
             startingX = currentSprite.getGlobalBounds().left;
             shotRight = false;
         } else {
@@ -61,10 +59,10 @@ bool Character::updateProjectiles(Level& currentLevel)
         }
         startingY = currentSprite.getGlobalBounds().top + (currentSprite.getGlobalBounds().height * BULLET_SPAWN_OFFSET_FACTOR);
 
-        currentProjectiles.addProjectile(sf::Vector2f(startingX, startingY), shotRight);
+        pActive.addProjectile(sf::Vector2f(startingX, startingY), shotRight);
     }
 
-    if (currentProjectiles.moveProjectiles(currentLevel, currentSprite.getGlobalBounds())) {
+    if (pActive.moveProjectiles(currentLevel, currentSprite.getGlobalBounds())) {
         return true;
     }
 
@@ -106,9 +104,9 @@ bool Character::checkAnimation()
     return updatedAnimation;
 }
 
-const std::vector<sf::Sprite>& Character::getProjectiles() const
+const std::vector<ProjectileManager::Projectile>& Character::getProjectiles() const
 {
-    return currentProjectiles.getProjectiles();
+    return pActive.getProjectiles();
 }
 
 const sf::Sprite& Character::getSprite() const
@@ -127,47 +125,53 @@ void Character::updateAnimation()
         cOff = tInterface->getCurrentOffset();
 
     if (shot) {
-        if (cAnim != CharAnim::SHOOT_LEFT && cAnim != CharAnim::SHOOT_RIGHT) {
+        if (cAnim != CharacterAnim::SHOOT_LEFT && cAnim != CharacterAnim::SHOOT_RIGHT) {
             //Transition To First Shoot Animation
             if (facingRight) {
-                tInterface->setTexture(CharAnim::SHOOT_RIGHT);
+                tInterface->setTexture(CharacterAnim::SHOOT_RIGHT);
             } else {
-                tInterface->setTexture(CharAnim::SHOOT_LEFT);
+                tInterface->setTexture(CharacterAnim::SHOOT_LEFT);
             }
         } else {
             //Transition To First Animation Or Advance Animation
             if (tInterface->getBounds(cAnim).first + cOff == tInterface->getBounds(cAnim).last) {
                 //From Last Animation To First Animation
                 if (facingRight) {
-                    tInterface->setTexture(CharAnim::SHOOT_RIGHT);
+                    tInterface->setTexture(CharacterAnim::SHOOT_RIGHT);
                 } else {
-                    tInterface->setTexture(CharAnim::SHOOT_LEFT);
+                    tInterface->setTexture(CharacterAnim::SHOOT_LEFT);
                 }
             } else {
                 tInterface->setNextTexture();
+
+                //This only needs to be done for "blocking" animations that cannot go from left to right or vice versa mid animation
+                if (tInterface->getCurrentAnimation() == CharacterAnim::SHOOT_RIGHT)
+                    facingRight = true;
+                else
+                    facingRight = false;
             }
         }
     } else {
         if (xSpeed > 0) {
             //Running Right
-            if (cAnim != CharAnim::RUN_RIGHT) {
-                tInterface->setTexture(CharAnim::RUN_RIGHT);
+            if (cAnim != CharacterAnim::RUN_RIGHT) {
+                tInterface->setTexture(CharacterAnim::RUN_RIGHT);
             } else {
                 //Transition To First Animation Or Advance Animation
                 if (tInterface->getBounds(cAnim).first + cOff == tInterface->getBounds(cAnim).last) {
-                    tInterface->setTexture(CharAnim::RUN_RIGHT);
+                    tInterface->setTexture(CharacterAnim::RUN_RIGHT);
                 } else {
                     tInterface->setNextTexture();
                 }
             }
         } else if (xSpeed < 0) {
             //Running Left
-            if (cAnim != CharAnim::RUN_LEFT) {
-                tInterface->setTexture(CharAnim::RUN_LEFT);
+            if (cAnim != CharacterAnim::RUN_LEFT) {
+                tInterface->setTexture(CharacterAnim::RUN_LEFT);
             } else {
                 //Transition To First Animation Or Advance Animation
                 if (tInterface->getBounds(cAnim).first + cOff == tInterface->getBounds(cAnim).last) {
-                    tInterface->setTexture(CharAnim::RUN_LEFT);
+                    tInterface->setTexture(CharacterAnim::RUN_LEFT);
                 } else {
                     tInterface->setNextTexture();
                 }
@@ -175,9 +179,9 @@ void Character::updateAnimation()
         } else {
             //Transition To Standing Position
             if (facingRight) {
-                tInterface->setTexture(CharAnim::STAND_RIGHT);
+                tInterface->setTexture(CharacterAnim::STAND_RIGHT);
             } else {
-                tInterface->setTexture(CharAnim::STAND_LEFT);
+                tInterface->setTexture(CharacterAnim::STAND_LEFT);
             }
         }
     }
@@ -222,9 +226,9 @@ bool Character::updateCoordTracking()
     lastTracking = currentTracking;
 
     //Special Cases
-    if (lAnimIndex == tInterface->getBounds(CharAnim::SHOOT_LEFT).last) {
+    if (lAnimIndex == tInterface->getBounds(CharacterAnim::SHOOT_LEFT).last) {
         currentTracking = BOTTOM_RIGHT;
-    } else if (lAnimIndex == tInterface->getBounds(CharAnim::SHOOT_RIGHT).last) {
+    } else if (lAnimIndex == tInterface->getBounds(CharacterAnim::SHOOT_RIGHT).last) {
         currentTracking = BOTTOM_LEFT;
     } else {
         //Other Cases

@@ -26,8 +26,13 @@ SFML 2.0 (or later) DLLs<br \>
 
 Update Log:
 -----------
+**V0.7**<br \>
++Added some more Manager classes and set up the classes to implement enemies<br \>
++Fixed the incorrect updating of bounds tracking when running left and shooting right (or vice versa)<br \>
++Fixed issue where stateLock was being set to false when retract animation started which let you fire off a bullet earlier than intended
+
 **V0.6**<br \>
-+Changed some file names to be more descriptive
++Changed some file names to be more descriptive<br \>
 +Rolled back version numbers to show that the game is not
  readily playable
 **Temporary Fix**<br \>

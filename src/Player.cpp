@@ -5,7 +5,7 @@ using namespace std;
 
 const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200, 200);
 
-//Could Add A Factory For AnimationManager/Animation Classes Later
+//Could Add A Factory For AnimationManager (or PlayerAnim to allows resource sharing for multiple players)
 Player::Player(sf::Vector2i windowBounds) : Character(new AnimationManager(new PlayerAnim)), wBounds(sf::Vector2i(0, 0), windowBounds), ySpeed(0),
                    scrollOffset(DEFAULT_SCROLL), knifed(false), jumped(false), falling(false), parachute(false), retract(false)
 {
@@ -56,7 +56,6 @@ void Player::retractParachute()
 {
     if (parachute) {
         parachute = false;
-        stateLock = false;
         retract = true;
     }
 }
@@ -180,7 +179,7 @@ void Player::updateAnimation()
         cOff = tInterface->getCurrentOffset(),
         cAnimIndex = tInterface->getBounds(cAnim).first + cOff;
 
-        lastSprite = currentSprite;
+    lastSprite = currentSprite;
 
     if (parachute || retract) {
             if (cAnim != PlayerAnim::PARACHUTE_LEFT && cAnim != PlayerAnim::PARACHUTE_RIGHT) {
@@ -226,6 +225,12 @@ void Player::updateAnimation()
                 }
             } else {
                 tInterface->setNextTexture();
+
+                //This only needs to be done for "blocking" animations that cannot go from left to right or vice versa mid animation
+                if (tInterface->getCurrentAnimation() == PlayerAnim::KNIFE_RIGHT)
+                    facingRight = true;
+                else
+                    facingRight = false;
             }
         }
     } else {
@@ -300,4 +305,6 @@ bool Player::checkForDeath()
     } //else if {
         //Got Shot
     //}
+
+    return died;
 }

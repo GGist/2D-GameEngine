@@ -2,17 +2,18 @@
 
 ***********************************************************************************/
 
-#ifndef ENEMIES_H
-#define ENEMIES_H
+#ifndef ENEMYMANAGER_H
+#define ENEMYMANAGER_H
 
+#include <Enemy.h>
 
-class Enemies
+class EnemyManager
 {
     public:
-        Enemies();
-        virtual ~Enemies();
+        EnemyManager();
+        virtual ~EnemyManager();
     protected:
     private:
 };
 
-#endif // ENEMIES_H
+#endif // ENEMYMANAGER_H

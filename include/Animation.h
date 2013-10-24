@@ -21,7 +21,7 @@ struct AnimBound {
 };
 
 //Base Class
-class CharAnim {
+class CharacterAnim {
 private:
     static const std::string PATH, MANIFEST, FORMAT;
 
@@ -34,8 +34,8 @@ protected:
     //Call This In Derived Class Constructors To Load Resources
 
 public:
-    CharAnim();
-    virtual ~CharAnim() {}
+    CharacterAnim();
+    virtual ~CharacterAnim() {}
     const std::vector<AnimBound>& getTextureBounds();
     //Returns textureBounds Which Is Synced With importedTextures
     const std::vector<sf::Texture>& getLoadedTextures();
@@ -52,7 +52,7 @@ public:
 };
 
 //Derived Classes
-class PlayerAnim : public CharAnim {
+class PlayerAnim : public CharacterAnim {
 
     static const std::string PATH, MANIFEST, FORMAT;
 

@@ -13,16 +13,14 @@ class Level
 {
     public:
         Level(sf::Vector2f windowRes);
-        //Constructor
         virtual ~Level();
-        //Destructor
         bool loadLevel(std::string fileName);
         //Loads the level from a file
         //Returns false if file could not be found
         void clearLevel();
         //Clears the current level
         bool setEditorMode(bool mode = false);
-        //THIS FUNCTION WIL ONLY WORK IF THE LEVEL IS CLEARED
+        //THIS FUNCTION REQUIRES THE LEVEL TO HAVE BEEN CLEARED
         //Puts the object in level editing mode to accept tiles through addTile
         //Returns false if the level has not been cleared
         bool addTile(sf::Vector2f coord);
@@ -48,7 +46,6 @@ class Level
         //Checks the sprite against the tileCoords
         //Returns false if the sprite is not hitting any tiles
 
-    protected:
     private:
         //Constants
         const int SCREEN_WIDTH, SCREEN_HEIGHT;

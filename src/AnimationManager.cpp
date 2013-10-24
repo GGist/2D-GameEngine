@@ -1,7 +1,7 @@
 #include "AnimationManager.h"
 
-AnimationManager::AnimationManager(CharAnim* animations) : textures(animations), textureBounds(textures->getTextureBounds()), loadedTextures(textures->getLoadedTextures()),
-                                                       currentAnimation(0), lastAnimation(0), currentOffset(0), lastOffset(0)
+AnimationManager::AnimationManager(CharacterAnim* animations) : textures(animations), textureBounds(textures->getTextureBounds()), loadedTextures(textures->getLoadedTextures()),
+                                                                currentAnimation(0), lastAnimation(0), currentOffset(0), lastOffset(0)
 {
 
 }

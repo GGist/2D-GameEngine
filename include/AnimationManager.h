@@ -10,7 +10,7 @@
 class AnimationManager
 {
     public:
-        AnimationManager(CharAnim* animations);
+        AnimationManager(CharacterAnim* animations);
         virtual ~AnimationManager();
         bool setTexture(const int anim, const int offset = 0);
         //Sets the current texture to the texture of the specified animation
@@ -41,11 +41,10 @@ class AnimationManager
         //Returns the AnimBound for the specified animation
 
     private:
-
         bool outOfBounds(const int& anim, const int& offset);
         //Returns true if the parameters are out of bounds
 
-        CharAnim* textures;
+        CharacterAnim* textures;
         const std::vector<AnimBound>& textureBounds;
         const std::vector<sf::Texture>& loadedTextures;
         int currentAnimation, lastAnimation;

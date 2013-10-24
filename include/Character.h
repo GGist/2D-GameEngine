@@ -5,7 +5,7 @@
 #ifndef CHARACTER_H
 #define CHARACTER_H
 
-#include <Projectile.h>
+#include <ProjectileManager.h>
 #include <AnimationManager.h>
 
 class Level;
@@ -33,7 +33,7 @@ class Character
         //This function should be overloaded to updated both the location and
         //animation of the currentSprite
         //Returns whether or not the screen should be scrolled
-        const std::vector<sf::Sprite>& getProjectiles() const;
+        const std::vector<ProjectileManager::Projectile>& getProjectiles() const;
         //Returns the projectiles vector object
         const sf::Sprite& getSprite() const;
         //Returns the currentSprite object
@@ -47,7 +47,6 @@ class Character
             BOTTOM_LEFT,
             BOTTOM_RIGHT
         };
-
 
         //Functions
         virtual void updateAnimation();
@@ -76,7 +75,7 @@ class Character
         virtual int getDefaultRunSpeed() const = 0;
         //Returns a default run speed constant
 
-        Projectile currentProjectiles;
+        ProjectileManager pActive;
 };
 
 #endif // CHARACTER_H

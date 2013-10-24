@@ -259,8 +259,8 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
             window.draw(level.getTile());
         } while (level.nextCoord());
         if (hero.updateProjectiles(level)) {
-            for_each(hero.getProjectiles().begin(), hero.getProjectiles().end(), [&window] (const sf::Sprite& p) {
-                window.draw(p);
+            for_each(hero.getProjectiles().begin(), hero.getProjectiles().end(), [&window] (const ProjectileManager::Projectile& p) {
+                window.draw(p.proj);
             });
         }
         if (SHOW_PLAYER_BOUNDS) {
