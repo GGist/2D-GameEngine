@@ -28,14 +28,17 @@ Update Log:
 -----------
 **V0.7**<br \>
 +Added some more Manager classes and set up the classes to implement enemies<br \>
-+Fixed the incorrect updating of bounds tracking when running left and shooting right (or vice versa)<br \>
-+Fixed issue where stateLock was being set to false when retract animation started which let you fire off a bullet earlier than intended
++Fixed the incorrect updating of bounds tracking when running left and shooting 
+right (or vice versa)<br \>
++Fixed issue where stateLock was being set to false when retract animation started which 
+let you fire off a bullet earlier than intended
 
 **V0.6**<br \>
 +Changed some file names to be more descriptive<br \>
++Changed some file names to be more descriptive<br \>
 +Rolled back version numbers to show that the game is not
- readily playable
-**Temporary Fix**<br \>
+ readily playable<br \>
+**Temporary Fix:**<br \>
 +When shooting one way and running the other the player tracking
 gets updated when it shouldnt<br \>
  +Temporary fix to not update facingRight in runRight() or runLeft() 
@@ -55,12 +58,12 @@ gets updated when it shouldnt<br \>
 **Bugs:**<br \>
 +State of parachute is not preserved when shooting or knifing
  mid air. Need to find a cleaner way of finding out whether sprite
- is facing left or right.<br \>
+ is facing left or right
 
 **V0.1:**<br \>
 +Deploy Parachute<br \>
 +updatePlayer() (previously named applySpeed())<br \>
--applySpeed()<br \>
+-applySpeed()
 
 **V0 (Initial Commit):**<br \>
 +Character movement<br \>
@@ -71,7 +74,7 @@ gets updated when it shouldnt<br \>
 +Level editor with local storage<br \>
 +Level loading from local storage<br \>
 +Character-Level collision detection<br \>
-+Projectile-Level collision detection<br \>
++Projectile-Level collision detection
 
 Features To Be Added:
 --------------------
