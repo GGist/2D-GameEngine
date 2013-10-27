@@ -26,12 +26,18 @@ SFML 2.0 (or later) DLLs<br \>
 
 Update Log:
 -----------
+**V0.8**<br \>
++Finished a utility program SpriteUtility that allows you to take a batch of images and
+ make copies of them that are fliped horizontally and/or vertically aswell as creating an
+ alpha channel to make them transparent
++ProjectileManager boundsCheck() function has been implemented
+
 **V0.7**<br \>
 +Added some more Manager classes and set up the classes to implement enemies<br \>
-+Fixed the incorrect updating of bounds tracking when running left and shooting 
-right (or vice versa)<br \>
-+Fixed issue where stateLock was being set to false when retract animation started which 
-let you fire off a bullet earlier than intended
++Fixed the incorrect updating of bounds tracking when running left and shooting
+ right (or vice versa)<br \>
++Fixed issue where stateLock was being set to false when retract animation started which
+ let you fire off a bullet earlier than intended
 
 **V0.6**<br \>
 +Changed some file names to be more descriptive<br \>
@@ -40,17 +46,17 @@ let you fire off a bullet earlier than intended
  readily playable<br \>
 **Temporary Fix:**<br \>
 +When shooting one way and running the other the player tracking
-gets updated when it shouldnt<br \>
- +Temporary fix to not update facingRight in runRight() or runLeft() 
- if shot, should find a better way to check if facingRight should be 
+ gets updated when it shouldnt<br \>
+ +Temporary fix to not update facingRight in runRight() or runLeft()
+ if shot, should find a better way to check if facingRight should be
  updated
 
 **V0.5:**<br \>
 +Refactored most of the code base to be more extensible
  when it comes to adding animations and loading them
  in as textures<br \>
- +AnimCollection class<br \>
- +TexutreManager class
++AnimCollection class<br \>
++TexutreManager class
  
 **V0.2:**<br \>
 +Retract Parachute<br \>

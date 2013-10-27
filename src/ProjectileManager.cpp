@@ -45,10 +45,10 @@ bool ProjectileManager::moveProjectiles(Level& currentLevel, sf::FloatRect playe
 
     //Was Familiarizing Myself With Lambdas, Maybe Not The Best Application
         //Note: Access to member variables works inside lambdas because internally they are called through the *this pointer
-    for_each(currentProjectiles.begin(), currentProjectiles.end(), [&currentLevel, &playerBounds, &index, this] (Projectile &projectile) {
+    for_each(currentProjectiles.begin(), currentProjectiles.end(), [&currentLevel, &playerBounds, &index, this] (Projectile& projectile) {
         if (projectile.proj.getTexture() == &projectileTextures[0]) {
             //Still Going Through The Air
-            if (projectile.direction) {
+            if (projectile.goingRight) {
                 //Going Right
                 projectile.proj.move(SPEED, 0);
             } else {
@@ -78,18 +78,21 @@ bool ProjectileManager::moveProjectiles(Level& currentLevel, sf::FloatRect playe
     return true;
 }
 
-const std::vector<ProjectileManager::Projectile>& ProjectileManager::getProjectiles() const
+const std::vector<Projectile>& ProjectileManager::getProjectiles() const
 {
     return currentProjectiles;
 }
 
-ProjectileManager::BoundType ProjectileManager::boundsCheck(sf::Sprite& entity)
+bool ProjectileManager::boundsCheck(sf::Sprite& entity)
 {
-    /*
-    for_each(currentProjectiles.begin(), currentProjectiles.end(), [this, &entity] (Projectile proj&) {
+    bool collision = false;
 
+    remove_if(currentProjectiles.begin(), currentProjectiles.end(), [&entity, &collision, this] (const Projectile& projectile) {
+        if (projectile.proj.getGlobalBounds().intersects(entity.getGlobalBounds()))
+            collision = true;
+
+        return collision;
     });
-    */
 
-    return NO_BOUND;
+    return collision;
 }

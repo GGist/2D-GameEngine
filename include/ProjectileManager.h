@@ -7,25 +7,24 @@
 
 class Level;
 
-
+//Container For Individual Projectiles
+struct Projectile {
+    Projectile(sf::Sprite p, bool d) :
+        proj(p), goingRight(d) {}
+    sf::Sprite proj;
+    bool goingRight;
+};
 
 class ProjectileManager
 {
     public:
-        //Container For Individual Projectiles
-        struct Projectile {
-            Projectile(sf::Sprite p, bool d) :
-                proj(p), direction(d) {}
-            sf::Sprite proj;
-            bool direction;
-        };
-
         ProjectileManager();
         //Constructor
         virtual ~ProjectileManager();
         //Destructor
         void addProjectile(sf::Vector2f starting, bool right);
         //Adds a projectile at the specified location and direction
+        void deleteProjectile();
         bool moveProjectiles(Level& currentLevel, sf::FloatRect playerBounds);
         //playerBounds NEEDS TO BE THE GLOBAL_BOUNDS FOR THE PLAYER
         //Moves the projectiles and checks for collision or off screen projectiles
@@ -40,7 +39,7 @@ class ProjectileManager
             RIGHT_BOUND,
             NO_BOUND
         };
-        BoundType boundsCheck(sf::Sprite& entity);
+        bool boundsCheck(sf::Sprite& entity);
         //Checks the sprite against the currentProjectiles
         //Returns false if the sprite is not hitting any projectiles
 
