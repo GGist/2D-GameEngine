@@ -27,7 +27,7 @@ SFML 2.0 (or later) DLLs<br \>
 Update Log:
 -----------
 **V0.8**<br \>
-+Finished a utility program SpriteUtility that allows you to take a batch of images and
++Finished a utility program SpriteManipulator that allows you to take a batch of images and
  make copies of them that are fliped horizontally and/or vertically aswell as creating an
  alpha channel to make them transparent
 +ProjectileManager boundsCheck() function has been implemented
