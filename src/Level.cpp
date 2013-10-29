@@ -3,9 +3,11 @@
 using namespace std;
 
 const sf::Vector2f Level::SCALE(1.2, 1.2);
-const string Level::TILE_NAME("Tile (14)"), Level::TILE_PATH("res/tiles/"), Level::TILE_FORMAT(".png"), Level::LEVEL_NAME("Coordinates.txt"), Level::LEVEL_PATH("res/tiles/");
+const string Level::TILE_NAME("Tile (14)"), Level::TILE_PATH("res/tiles/"), Level::TILE_FORMAT(".png"),
+    Level::LEVEL_NAME("Coordinates.txt"), Level::LEVEL_PATH("res/tiles/");
 
-Level::Level(sf::Vector2f windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(windowRes.y), editingMode(false), tileCounter(0)
+Level::Level(sf::Vector2f windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(windowRes.y),
+    editingMode(false), tileCounter(0)
 {
     tileTexture.loadFromFile(TILE_PATH + TILE_NAME + TILE_FORMAT);
     tile.setTexture(tileTexture);
@@ -152,15 +154,13 @@ bool Level::sortTileQueue()
     sf::Vector2f temp;
     sf::Vector2f* sortedCoords;
 
-    if (tileCoords.empty() || queueSize == 1) {
+    if (tileCoords.empty() || queueSize == 1)
         return true;
-    }
 
     sortedCoords = new sf::Vector2f[tileCoords.size()];
 
-    if (sortedCoords == NULL) {
+    if (sortedCoords == nullptr)
         return false;
-    }
 
     //Push Into Array
     for (int i = 0; i < queueSize; i++) {
@@ -192,9 +192,8 @@ bool Level::sortTileQueue()
     }
 
     //Push Into Queue
-    for (int i = 0; i < queueSize; i++) {
+    for (int i = 0; i < queueSize; i++)
         tileCoords.push(sortedCoords[i]);
-    }
 
     delete sortedCoords;
 

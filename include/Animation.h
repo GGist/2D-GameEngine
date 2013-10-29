@@ -5,11 +5,10 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include <iostream>
-#include <SFML/Graphics.hpp>
 #include <string>
 #include <fstream>
 #include <vector>
+#include <SFML/Graphics.hpp>
 
 //Container Struct
 struct AnimBound {
@@ -21,25 +20,32 @@ struct AnimBound {
 };
 
 //Base Class
-class CharacterAnim {
-private:
-    static const std::string PATH, MANIFEST, FORMAT;
-
-    std::vector<AnimBound> textureBounds;
-    std::vector<sf::Texture> loadedTextures;
+class Animation {
+public:
+    Animation() : animationIndex(-1) {}
+    virtual ~Animation() = 0;
+    const std::vector<AnimBound>& getTextureBounds();
+    //Returns textureBounds Which Is Synced With importedTextures
+    const std::vector<sf::Texture>& getLoadedTextures();
+    //Returns loadedTextures
 
 protected:
     void loadTextures(const std::string& path, const std::string& manifest, const std::string& format);
     //Loads Textures In The Manifest File And Location Specified By The Parameters
     //Call This In Derived Class Constructors To Load Resources
 
+private:
+    int animationIndex;
+
+    std::vector<AnimBound> textureBounds;
+    std::vector<sf::Texture> loadedTextures;
+};
+
+//Default Animations
+class CharacterAnim : public Animation{
 public:
-    CharacterAnim();
-    virtual ~CharacterAnim() {}
-    const std::vector<AnimBound>& getTextureBounds();
-    //Returns textureBounds Which Is Synced With importedTextures
-    const std::vector<sf::Texture>& getLoadedTextures();
-    //Returns loadedTextures
+    CharacterAnim(const std::string& path, const std::string& manifest, const std::string& format);
+    virtual ~CharacterAnim() = 0;
 
     static const int SHOOT_LEFT = 0;
     static const int SHOOT_RIGHT = 1;
@@ -51,9 +57,9 @@ public:
     //Eg: Start Next Animation At 6
 };
 
-//Derived Classes
+//Extended Animations
 class PlayerAnim : public CharacterAnim {
-
+private:
     static const std::string PATH, MANIFEST, FORMAT;
 
 public:
@@ -64,6 +70,17 @@ public:
     static const int KNIFE_RIGHT = 7;
     static const int PARACHUTE_LEFT = 8;
     static const int PARACHUTE_RIGHT = 9;
+    //Make Sure New Animation Values Are Declared Consecutively With These
+    //Eg: Start Next Animation At 10
+};
+
+class EnemyAnim : public CharacterAnim {
+private:
+    static const std::string PATH, MANIFEST, FORMAT;
+
+public:
+    EnemyAnim();
+    virtual ~EnemyAnim() {}
 };
 
 #endif // ANIMATION_H

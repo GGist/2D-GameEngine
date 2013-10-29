@@ -37,9 +37,8 @@ void ProjectileManager::addProjectile(sf::Vector2f starting, bool right)
 
 bool ProjectileManager::moveProjectiles(Level& currentLevel, sf::FloatRect playerBounds)
 {
-    if (currentProjectiles.empty()) {
+    if (currentProjectiles.empty())
         return false;
-    }
 
     int index = 0;
 

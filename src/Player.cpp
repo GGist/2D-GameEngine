@@ -6,12 +6,13 @@ using namespace std;
 const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200, 200);
 
 //Could Add A Factory For AnimationManager (or PlayerAnim to allows resource sharing for multiple players)
-Player::Player(sf::Vector2i windowBounds) : Character(new AnimationManager(new PlayerAnim)), wBounds(sf::Vector2i(0, 0), windowBounds), ySpeed(0),
-                   scrollOffset(DEFAULT_SCROLL), knifed(false), jumped(false), falling(false), parachute(false), retract(false)
+Player::Player(sf::Vector2i windowBounds) : Character(new PlayerAnim), wBounds(sf::Vector2i(0, 0),
+    windowBounds), ySpeed(0), scrollOffset(DEFAULT_SCROLL), knifed(false), jumped(false), falling(false),
+    parachute(false), retract(false), animTimer()
 {
-    tInterface->setTexture(PlayerAnim::STAND_RIGHT);
+    aManager->setTexture(PlayerAnim::STAND_RIGHT);
 
-    currentSprite.setTexture(tInterface->getCurrentTexture(), true);
+    currentSprite.setTexture(aManager->getCurrentTexture(), true);
     currentSprite.setPosition(STARTING_POSITION);
     currentSprite.setScale(SPRITE_SCALE);
 
@@ -21,10 +22,7 @@ Player::Player(sf::Vector2i windowBounds) : Character(new AnimationManager(new P
 
 Player::~Player()
 {
-    if (tInterface != nullptr) {
-        delete tInterface;
-        tInterface = nullptr;
-    }
+
 }
 
 void Player::knife()
@@ -60,55 +58,79 @@ void Player::retractParachute()
     }
 }
 
+bool Player::checkProjectiles(Level& currentLevel)
+{
+    //In case the GUNFIRE_OFFSET animation stays the same for > 1 checkProjectiles() call
+    static bool shotOnce = false;
+
+    sf::Vector2f spawnPoint;
+    bool shootingRight;
+
+    if (!shotOnce && shot && aManager->getCurrentOffset() == GUNFIRE_OFFSET) {
+        if (aManager->getCurrentAnimation() == CharacterAnim::SHOOT_LEFT) {
+            spawnPoint.x = getSprite().getGlobalBounds().left;
+            shootingRight = false;
+        } else {
+            spawnPoint.x = getSprite().getGlobalBounds().left + getSprite().getGlobalBounds().width;
+            shootingRight = true;
+        }
+        spawnPoint.y = currentSprite.getGlobalBounds().top +
+            (currentSprite.getGlobalBounds().height * BULLET_SPAWN_OFFSET_FACTOR);
+        createProjectile(spawnPoint, shootingRight);
+
+        shotOnce = true;
+
+        return true;
+    } else {
+        shotOnce = false;
+    }
+
+    return updateProjectiles(currentLevel);
+}
+
 bool Player::checkAnimation()
 {
-    if (tInterface == nullptr) {
-        return false;
-    }
+    bool updateAnim = false;
 
-    int pAnim = tInterface->getCurrentAnimation();
-    bool updatedInChar;
-
-    //Update Animation Immediately Or Wait
-    if (parachute || retract || knifed) {
-        updateAnimation();
-        animationWait.restart();
-
-        translateCoords();
-        updateState();
-    }  else if (!jumped && (pAnim == PlayerAnim::PARACHUTE_LEFT || pAnim == PlayerAnim::PARACHUTE_RIGHT)) {
+    if (shot || knifed || parachute || retract) {
+        //Fast Looped Animation
+        if (animTimer.getElapsedTime().asSeconds() > SLOW_ANIMATION_DELAY) {
+            updateAnim = true;
+        }
+    } else if (!jumped && (aManager->getCurrentAnimation() == PlayerAnim::PARACHUTE_LEFT ||
+                           aManager->getCurrentAnimation() == PlayerAnim::PARACHUTE_RIGHT)) {
         //If Finished Jumping
-        Character::updateAnimation();
-        animationWait.restart();
-
-        translateCoords();
-        updateState();
-    } else {
-        //Other Cases
-        updatedInChar = Character::checkAnimation();
+        updateAnim = true;
+    } else if (xSpeed > 0 && !facingRight) {
+        //If Changing Direction From Left To Right
+        updateAnim = true;
+    } else if (xSpeed < 0 && facingRight) {
+        //If Changing Direction From Right To Left
+        updateAnim = true;
+    } else if (!updateAnim && animTimer.getElapsedTime().asSeconds() > ANIMATION_DELAY) {
+        //Normal Looped Animation Ex: Run
+        updateAnim = true;
     }
 
-    if (!updatedInChar && animationWait.getElapsedTime().asSeconds() > ANIMATION_DELAY) {
-        //After ANIMATION_DELAY Update Looped Animation
+    if (updateAnim) {
         updateAnimation();
-        animationWait.restart();
 
         translateCoords();
         updateState();
+
+        animTimer.restart();
     }
 
-    return true;
+    return updateAnim;
 }
 
 bool Player::applySpeed(Level& currentLevel)
 {
-    if (tInterface == nullptr) {
+    if (aManager == nullptr)
         return false;
-    }
 
     bool scroll = false;
     Level::BoundType horiz, vert;
-
 
     //Should Make Separate Functions For Checking Touched Bounds And Fixing Bounds In Future
     vert = currentLevel.boundsCheck(currentSprite, VERTICAL);
@@ -168,86 +190,16 @@ bool Player::applySpeed(Level& currentLevel)
     return scroll;
 }
 
-int Player::getDefaultRunSpeed() const
-{
-    return DEFAULT_RUN_SPEED;
-}
-
-void Player::updateAnimation()
-{
-    int cAnim = tInterface->getCurrentAnimation(),
-        cOff = tInterface->getCurrentOffset(),
-        cAnimIndex = tInterface->getBounds(cAnim).first + cOff;
-
-    lastSprite = currentSprite;
-
-    if (parachute || retract) {
-            if (cAnim != PlayerAnim::PARACHUTE_LEFT && cAnim != PlayerAnim::PARACHUTE_RIGHT) {
-                if (facingRight) {
-                    tInterface->setTexture(PlayerAnim::PARACHUTE_RIGHT);
-                } else {
-                    tInterface->setTexture(PlayerAnim::PARACHUTE_LEFT);
-                }
-            } else if (cAnimIndex != tInterface->getBounds(cAnim).last) {
-                if (xSpeed > 0 && cAnim == PlayerAnim::PARACHUTE_LEFT) {
-                    tInterface->setTexture(PlayerAnim::PARACHUTE_RIGHT, ++cOff);
-                } else if (xSpeed < 0 && cAnim == PlayerAnim::PARACHUTE_RIGHT) {
-                    tInterface->setTexture(PlayerAnim::PARACHUTE_LEFT, ++cOff);
-                } else {
-                    (parachute) ? tInterface->setNextTexture() : tInterface->setTexture(cAnim, --cOff);
-                }
-            } else {
-                if (retract) {
-                    tInterface->setTexture(cAnim, --cOff);
-                } else {
-                    if (xSpeed > 0) {
-                        int lastOffset = tInterface->getBounds(PlayerAnim::PARACHUTE_RIGHT).last - tInterface->getBounds(PlayerAnim::PARACHUTE_RIGHT).first;
-                        tInterface->setTexture(PlayerAnim::PARACHUTE_RIGHT, lastOffset);
-                    } else if (xSpeed < 0) {
-                        int lastOffset = tInterface->getBounds(PlayerAnim::PARACHUTE_LEFT).last - tInterface->getBounds(PlayerAnim::PARACHUTE_LEFT).first;
-                        tInterface->setTexture(PlayerAnim::PARACHUTE_LEFT, lastOffset);
-                    }
-                }
-            }
-    } else if (knifed) {
-        if (cAnim != PlayerAnim::KNIFE_LEFT && cAnim != PlayerAnim::KNIFE_RIGHT) {
-            if (facingRight) {
-                tInterface->setTexture(PlayerAnim::KNIFE_RIGHT);
-            } else {
-                tInterface->setTexture(PlayerAnim::KNIFE_LEFT);
-            }
-        } else {
-            if (tInterface->getBounds(cAnim).first + cOff == tInterface->getBounds(cAnim).last) {
-                if (facingRight) {
-                    tInterface->setTexture(PlayerAnim::KNIFE_RIGHT);
-                } else {
-                    tInterface->setTexture(PlayerAnim::KNIFE_LEFT);
-                }
-            } else {
-                tInterface->setNextTexture();
-
-                //This only needs to be done for "blocking" animations that cannot go from left to right or vice versa mid animation
-                if (tInterface->getCurrentAnimation() == PlayerAnim::KNIFE_RIGHT)
-                    facingRight = true;
-                else
-                    facingRight = false;
-            }
-        }
-    } else {
-        Character::updateAnimation();
-    }
-
-    currentSprite.setTexture(tInterface->getCurrentTexture(), true);
-}
-
 void Player::updateState()
 {
-    int cAnimIndex = tInterface->getBounds(tInterface->getCurrentAnimation()).first + tInterface->getCurrentOffset();
+    int cAnimIndex = aManager->getBounds(aManager->getCurrentAnimation()).first + aManager->getCurrentOffset();
 
-    if (retract && cAnimIndex == tInterface->getBounds(tInterface->getCurrentAnimation()).first) {
+    if (retract && cAnimIndex == aManager->getBounds(aManager->getCurrentAnimation()).first) {
+        //Last Retract Animation (First Parachute)
         retract = false;
         stateLock = false;
-    } else if (knifed && cAnimIndex == tInterface->getBounds(tInterface->getCurrentAnimation()).last) {
+    } else if (knifed && cAnimIndex == aManager->getBounds(aManager->getCurrentAnimation()).last) {
+        //Last Knife Animation
         knifed = false;
         stateLock = false;
     } else {
@@ -258,8 +210,8 @@ void Player::updateState()
 
 bool Player::updateCoordTracking()
 {
-    int cAnimIndex = tInterface->getBounds(tInterface->getCurrentAnimation()).first + tInterface->getCurrentOffset();
-    int lAnimIndex = tInterface->getBounds(tInterface->getLastAnimation()).first + tInterface->getLastOffset();
+    int cAnimIndex = aManager->getBounds(aManager->getCurrentAnimation()).first + aManager->getCurrentOffset();
+    int lAnimIndex = aManager->getBounds(aManager->getLastAnimation()).first + aManager->getLastOffset();
 
     if (cAnimIndex == lAnimIndex) {
         return false;
@@ -268,14 +220,14 @@ bool Player::updateCoordTracking()
     lastTracking = currentTracking;
 
     //Special Cases
-    if (lAnimIndex == tInterface->getBounds(PlayerAnim::KNIFE_LEFT).last) {
+    if (lAnimIndex == aManager->getBounds(PlayerAnim::KNIFE_LEFT).last) {
         currentTracking = BOTTOM_RIGHT;
-    } else if (lAnimIndex == tInterface->getBounds(PlayerAnim::KNIFE_RIGHT).last) {
+    } else if (lAnimIndex == aManager->getBounds(PlayerAnim::KNIFE_RIGHT).last) {
         currentTracking = BOTTOM_LEFT;
     } else {
         //Other Cases
         if (parachute || retract) {
-            if (cAnimIndex != tInterface->getBounds(PlayerAnim::PARACHUTE_RIGHT).last && cAnimIndex != tInterface->getBounds(PlayerAnim::PARACHUTE_LEFT).last) {
+            if (cAnimIndex != aManager->getBounds(PlayerAnim::PARACHUTE_RIGHT).last && cAnimIndex != aManager->getBounds(PlayerAnim::PARACHUTE_LEFT).last) {
                 if (facingRight) {
                     currentTracking = BOTTOM_RIGHT;
                 } else {
@@ -296,6 +248,80 @@ bool Player::updateCoordTracking()
     }
 
     return true;
+}
+
+bool Player::updateAnimation()
+{
+    int cAnim = aManager->getCurrentAnimation(),
+        cOff = aManager->getCurrentOffset(),
+        cAnimIndex = aManager->getBounds(cAnim).first + cOff;
+
+    lastSprite = currentSprite;
+
+    if (parachute || retract) {
+            if (cAnim != PlayerAnim::PARACHUTE_LEFT && cAnim != PlayerAnim::PARACHUTE_RIGHT) {
+                if (facingRight) {
+                    aManager->setTexture(PlayerAnim::PARACHUTE_RIGHT);
+                } else {
+                    aManager->setTexture(PlayerAnim::PARACHUTE_LEFT);
+                }
+            } else if (cAnimIndex != aManager->getBounds(cAnim).last) {
+                if (xSpeed > 0 && cAnim == PlayerAnim::PARACHUTE_LEFT) {
+                    aManager->setTexture(PlayerAnim::PARACHUTE_RIGHT, ++cOff);
+                } else if (xSpeed < 0 && cAnim == PlayerAnim::PARACHUTE_RIGHT) {
+                    aManager->setTexture(PlayerAnim::PARACHUTE_LEFT, ++cOff);
+                } else {
+                    (parachute) ? aManager->setNextTexture() : aManager->setTexture(cAnim, --cOff);
+                }
+            } else {
+                if (retract) {
+                    aManager->setTexture(cAnim, --cOff);
+                } else {
+                    if (xSpeed > 0) {
+                        int lastOffset = aManager->getBounds(PlayerAnim::PARACHUTE_RIGHT).last - aManager->getBounds(PlayerAnim::PARACHUTE_RIGHT).first;
+                        aManager->setTexture(PlayerAnim::PARACHUTE_RIGHT, lastOffset);
+                    } else if (xSpeed < 0) {
+                        int lastOffset = aManager->getBounds(PlayerAnim::PARACHUTE_LEFT).last - aManager->getBounds(PlayerAnim::PARACHUTE_LEFT).first;
+                        aManager->setTexture(PlayerAnim::PARACHUTE_LEFT, lastOffset);
+                    }
+                }
+            }
+    } else if (knifed) {
+        if (cAnim != PlayerAnim::KNIFE_LEFT && cAnim != PlayerAnim::KNIFE_RIGHT) {
+            if (facingRight) {
+                aManager->setTexture(PlayerAnim::KNIFE_RIGHT);
+            } else {
+                aManager->setTexture(PlayerAnim::KNIFE_LEFT);
+            }
+        } else {
+            if (aManager->getBounds(cAnim).first + cOff == aManager->getBounds(cAnim).last) {
+                if (facingRight) {
+                    aManager->setTexture(PlayerAnim::KNIFE_RIGHT);
+                } else {
+                    aManager->setTexture(PlayerAnim::KNIFE_LEFT);
+                }
+            } else {
+                aManager->setNextTexture();
+
+                //This only needs to be done for "blocking" animations that cannot go from left to right or vice versa mid animation
+                if (aManager->getCurrentAnimation() == PlayerAnim::KNIFE_RIGHT)
+                    facingRight = true;
+                else
+                    facingRight = false;
+            }
+        }
+    } else {
+        Character::updateAnimation();
+    }
+
+    currentSprite.setTexture(aManager->getCurrentTexture(), true);
+
+    return true;
+}
+
+int Player::getDefaultRunSpeed() const
+{
+    return DEFAULT_RUN_SPEED;
 }
 
 bool Player::checkForDeath()

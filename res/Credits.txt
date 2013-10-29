@@ -1,6 +1,10 @@
 IMAGES:
 
-Sprites
+Enemy Sprites
+Redshrike
+http://opengameart.org/content/fighting-robot-for-ultimate-smash-friends
+
+Hero Sprites
 _Allen_ and Zepher_Takase
 http://www.freewebs.com/tiredfreakedoutproductions/apps/photos/photo?photoid=11462387
 

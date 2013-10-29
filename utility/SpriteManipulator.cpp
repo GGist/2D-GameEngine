@@ -2,10 +2,12 @@
 *This is a utility class for generating sprites based off of current images. You   *
 *can flip sprites horizontally and/or vertically aswell as overwrite a current     *
 *color with an alpha channel. This class requires the graphics, window, and system *
-*modules of SFML (2.0 or later).                                                   *
+*modules of SFML (2.0 or later). Supported image formats are bmp, png, tga, jpg,   *
+gif, psd, hdr and pic.                                                             *
 ***********************************************************************************/
 
 #include <iostream>
+#include <string>
 #include <cctype>
 #include <fstream>
 #include <SFML/Graphics.hpp>
@@ -13,11 +15,21 @@
 using namespace std;
 
 static const unsigned int MIN_COMMAND_LENGTH = 9, MAX_COLOR_LENGTH = 3, MAX_COLOR = 255;
-static const string QUIT = "quit";
+static const string QUIT = "quit", FORMAT = ".png";
 
 struct Image_Mod {
     Image_Mod() : horizontal(false), vertical(false),
     alpha(false), cReplace(), sAppend() {}
+    void resetValues()
+    {
+        horizontal = false;
+        vertical = false;
+        alpha = false;
+        cReplace.r = 0;
+        cReplace.g = 0;
+        cReplace.b = 0;
+        sAppend.clear();
+    }
 
     bool horizontal,
          vertical,
@@ -27,13 +39,13 @@ struct Image_Mod {
 };
 
 void purgeWhite(string& input);
-bool isValid(string input, Image_Mod& im);
+//Removes all of the white space from the argument input
+bool parseCommand(string input, Image_Mod& im);
+//Returns false if the command is invalid
 
 int main()
 {
-    cout << "a";
-    //Can flip and/or create alpha channel
-    cout << "\t\t\t\t**Sprite Manipulator**" << endl
+    cout << "\t\t\t\t**Sprite Utility**" << endl
          << "Instructions:" << endl
          << "1. Create a folder in this directory called \"data\"" << endl
          << "2. Create a text file called \"Manifest\" in the folder data" << endl
@@ -56,15 +68,13 @@ int main()
 
     cout << endl << "$ ";
     getline(cin, userInput);
-    transform(userInput.begin(), userInput.end(), userInput.begin(), ::tolower);
 
     while (userInput != QUIT) {
-        while (!isValid(userInput, iMod)) {
+        while (!parseCommand(userInput, iMod) && userInput != QUIT) {
             cout << endl << "Invalid Command" << endl;
             cout << endl << "$ ";
             getline(cin, userInput);
         }
-
 
         ifstream manifest;
         string filename;
@@ -74,7 +84,7 @@ int main()
         manifest.open("data/Manifest.txt");
 
         while (manifest >> filename) {
-            image.loadFromFile("data/" + filename + ".png");
+            image.loadFromFile("data/" + filename + FORMAT);
 
             if (iMod.horizontal)
                 image.flipHorizontally();
@@ -83,16 +93,16 @@ int main()
             if (iMod.alpha)
                 image.createMaskFromColor(iMod.cReplace);
 
-            image.saveToFile("data/" + filename + iMod.sAppend + ".png");
+            image.saveToFile("data/" + filename + iMod.sAppend + FORMAT);
         }
 
         manifest.close();
 
-        cout << endl << "Finished..." << endl;
+        cout << endl << "...Finished" << endl;
+        iMod.resetValues();
 
         cout << endl << "$ ";
         getline(cin, userInput);
-        transform(userInput.begin(), userInput.end(), userInput.begin(), ::tolower);
     }
 
     return 0;
@@ -118,7 +128,7 @@ void purgeWhite(string& input) {
     }
 }
 
-bool isValid(string input, Image_Mod& im) {
+bool parseCommand(string input, Image_Mod& im) {
     purgeWhite(input);
     //Used to preserve filename
     string preservedInput = input;
@@ -129,9 +139,8 @@ bool isValid(string input, Image_Mod& im) {
     if (input.find("start-") != 0 || input.length() < MIN_COMMAND_LENGTH)
         return false;
 
-    int index = 6;
     string convert = "";
-    int r = 0, g = 0, b = 0, digits = 0;
+    unsigned int index = 6, digits = 0, r = 0, g = 0, b = 0;
 
     while (index < input.length()) {
         switch(input[index])
@@ -146,7 +155,9 @@ bool isValid(string input, Image_Mod& im) {
             else
                 return false;
 
-            ++index;
+            //Check for another tag marker
+            if (input[++index] == '-')
+                ++index;
             break;
         case 'a':
             //Alpha Channel
@@ -202,14 +213,16 @@ bool isValid(string input, Image_Mod& im) {
             im.cReplace.g = g;
             im.cReplace.b = b;
 
-            ++index;
+            //Check for another tag marker
+            if (input[++index] == '-')
+                ++index;
             break;
         default:
             //Append result filename
             im.sAppend = preservedInput.substr(index, input.size() - index);
             index = input.length();
             break;
-    }
+        }
     }
 
     return true;
