@@ -32,7 +32,6 @@ Update Log:
 +Implemented most of the Enemy class<br \>
 +Added Enemy animations to the res\anims\ folder
 
-
 **V0.8**<br \>
 +Finished a utility program SpriteManipulator that allows you to take a batch of images and
  make copies of them that are fliped horizontally and/or vertically aswell as creating an
