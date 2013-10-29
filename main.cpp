@@ -258,8 +258,8 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
         do {
             window.draw(level.getTile());
         } while (level.nextCoord());
-        if (hero.updateProjectiles(level)) {
-            for_each(hero.getProjectiles().begin(), hero.getProjectiles().end(), [&window] (const ProjectileManager::Projectile& p) {
+        if (hero.checkProjectiles(level)) {
+            for_each(hero.getProjectiles().begin(), hero.getProjectiles().end(), [&window] (const Projectile& p) {
                 window.draw(p.proj);
             });
         }
