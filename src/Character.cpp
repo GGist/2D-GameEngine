@@ -13,10 +13,7 @@ Character::Character(CharacterAnim* cAnim) : aManager(new AnimationManager(cAnim
 
 Character::~Character()
 {
-    if (aManager != nullptr)
-        delete aManager;
 
-    aManager = nullptr;
 }
 
 void Character::runRight()
@@ -29,6 +26,11 @@ void Character::runLeft()
 {
     xSpeed = -getDefaultRunSpeed() - speedModifier;
     facingRight = false;
+}
+
+void Character::stopRun()
+{
+    xSpeed = 0;
 }
 
 void Character::shoot()
@@ -44,9 +46,13 @@ bool Character::isDead()
     return died;
 }
 
-const std::vector<Projectile>& Character::getProjectiles() const
+void Character::drawProjectiles(sf::RenderWindow& renderWindow) const
 {
-    return pManager.getProjectiles();
+    vector<Projectile> projectiles = pManager.getProjectiles();
+
+    for (int i = 0; i < projectiles.size(); ++i) {
+        renderWindow.draw(projectiles[i].proj);
+    }
 }
 
 const sf::Sprite& Character::getSprite() const
@@ -54,9 +60,9 @@ const sf::Sprite& Character::getSprite() const
     return currentSprite;
 }
 
-const int Character::getCurrentRunSpeed() const
+int Character::getCurrentRunSpeed() const
 {
-    return getDefaultRunSpeed() + speedModifier;
+    return xSpeed;
 }
 
 void Character::updateState()
@@ -202,6 +208,8 @@ bool Character::updateAnimation()
             }
         }
     }
+
+    currentSprite.setTexture(aManager->getCurrentTexture(), true);
 
     return true;
 }

@@ -23,6 +23,8 @@ struct AnimBound {
 class Animation {
 public:
     Animation() : animationIndex(-1) {}
+    Animation(const Animation& anim) : textureBounds(anim.textureBounds),
+        loadedTextures(anim.loadedTextures) {}
     virtual ~Animation() = 0;
     const std::vector<AnimBound>& getTextureBounds();
     //Returns textureBounds Which Is Synced With importedTextures

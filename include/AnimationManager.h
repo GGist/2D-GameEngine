@@ -11,7 +11,9 @@ class AnimationManager
 {
     public:
         AnimationManager(Animation* animations);
+        //Constructor
         virtual ~AnimationManager();
+        //Destructor
         bool setTexture(const int anim, const int offset = 0);
         //Sets the current texture to the texture of the specified animation
         //with an optional offset that is past the first texture of the animation

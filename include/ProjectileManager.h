@@ -25,6 +25,7 @@ class ProjectileManager
         void addProjectile(sf::Vector2f starting, bool right);
         //Adds a projectile at the specified location and direction
         void deleteProjectile();
+        //
         bool moveProjectiles(Level& currentLevel, sf::FloatRect playerBounds);
         //playerBounds NEEDS TO BE THE GLOBAL_BOUNDS FOR THE PLAYER
         //Moves the projectiles and checks for collision or off screen projectiles

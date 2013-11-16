@@ -1,12 +1,14 @@
 #include <iostream>
-#include <SFML/Graphics.hpp>
 #include <Player.h>
+#include <EnemyManager.h>
 #include <Level.h>
+#include <SFML/Graphics.hpp>
 
 using namespace std;
 
 const int X_RES = 1280, Y_RES = 720, FPS = 60, ICON_X_SIZE = 48, ICON_Y_SIZE = 63, BOUNDS_THICKNESS = 3;
-const string WINDOW_TITLE = "SFML-Shooter", WINDOW_ICON = "res/icon.png", LEVEL_BACKGROUND = "res/backgrounds/level_background.png", LEVEL_DATA = "res/tiles/Coordinates.txt";
+const string WINDOW_TITLE = "SFML-Shooter", WINDOW_ICON = "res/icon.png",
+    LEVEL_BACKGROUND = "res/backgrounds/level_background.png", LEVEL_DATA = "res/level_data/Level_Coords.txt";
 const bool SHOW_PLAYER_BOUNDS = false;
 
 void frameLimiter(sf::Time previousTime);
@@ -82,14 +84,14 @@ void frameLimiter(sf::Time previousTime)
 ***********************************************************************************/
 bool editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite background)
 {
-    Level level(sf::Vector2f(X_RES, Y_RES));
-    const int TILE_WIDTH = level.getTile().getGlobalBounds().width;
+    Level level(sf::Vector2i(X_RES, Y_RES));
+    const int TILE_WIDTH = level.getSampleTile().getGlobalBounds().width;
     int x, y, lastX, lastY, scroll = 0;
     bool held = false, windowFocused = true;
     sf::Sprite displayTile;
     sf::Event mainEvent;
 
-    displayTile = level.getTile();
+    displayTile = level.getSampleTile();
     level.setEditorMode(true);
     while (window.isOpen()) {
         while (window.pollEvent(mainEvent)) {
@@ -143,9 +145,7 @@ bool editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
             window.clear(sf::Color::White);
             window.draw(background);
             window.draw(displayTile);
-            do {
-                window.draw(level.getTile());
-            } while (level.nextCoord());
+            level.drawLevel(window);
             //End Drawing Window
             window.display();
 
@@ -156,13 +156,17 @@ bool editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
 bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite background)
 {
     Player hero(sf::Vector2i(X_RES, Y_RES));
-    Level level(sf::Vector2f(X_RES, Y_RES));
+    Level level(sf::Vector2i(X_RES, Y_RES));
     int totalOffset = 0;
     int test = 0;
     bool windowFocused = true;
     sf::Event mainEvent;
     sf::Clock timeStep;
     sf::Clock testC;
+
+
+    EnemyManager eManager(sf::Vector2i(X_RES, Y_RES));
+    eManager.addEnemy(sf::Vector2f(500, 500));
 
     //Hero Bounds Settings
     sf::RectangleShape heroBounds;
@@ -189,6 +193,8 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
                 case sf::Event::KeyReleased:
                     if (mainEvent.key.code == sf::Keyboard::Space) {
                         hero.retractParachute();
+                    } else if (mainEvent.key.code == sf::Keyboard::D || mainEvent.key.code == sf::Keyboard::A) {
+                        hero.stopRun();
                     }
                     break;
                 case sf::Event::LostFocus:
@@ -198,7 +204,7 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
                     windowFocused = true;
                     break;
                 case sf::Event::MouseMoved:
-                    cout << "(" << mainEvent.mouseMove.x << ", " << mainEvent.mouseMove.y << ")" << endl;
+                    //cout << "(" << mainEvent.mouseMove.x << ", " << mainEvent.mouseMove.y << ")" << endl;
                     break;
             }
         }
@@ -229,8 +235,10 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
             test = 0;
             testC.restart();
         }
-
         ++test;
+
+        eManager.updateEnemies(hero.getSprite().getGlobalBounds(), level);
+
         hero.checkAnimation();
         if (hero.applySpeed(level)) {
             //Scroll
@@ -255,17 +263,12 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
         //Start Drawing Window
         window.clear(sf::Color::White);
         window.draw(background);
-        do {
-            window.draw(level.getTile());
-        } while (level.nextCoord());
-        if (hero.checkProjectiles(level)) {
-            for_each(hero.getProjectiles().begin(), hero.getProjectiles().end(), [&window] (const Projectile& p) {
-                window.draw(p.proj);
-            });
-        }
-        if (SHOW_PLAYER_BOUNDS) {
+        level.drawLevel(window);
+        if (hero.checkProjectiles(level))
+            hero.drawProjectiles(window);
+        if (SHOW_PLAYER_BOUNDS)
             window.draw(heroBounds);
-        }
+        eManager.drawEnemies(window);
         window.draw(hero.getSprite());
         //End Drawing Window
         window.display();

@@ -11,7 +11,9 @@ class Player : public Character
 {
     public:
         Player(sf::Vector2i windowBounds);
+        //Constructor
         virtual ~Player();
+        //Destructor
         void knife();
         //Causes the player to perform a knife melee attack
         void jump();
@@ -31,11 +33,11 @@ class Player : public Character
 
     private:
         //Constants
-        static constexpr int DEFAULT_RUN_SPEED = 6, DEFAULT_SCROLL = 512, JUMP_SPEED = -18,
-        PARACHUTE_LEFT_TO_RIGHT = 19, PARACHUTE_RIGHT_TO_LEFT = -17, GUNFIRE_OFFSET = 5;
+        static constexpr int DEFAULT_RUN_SPEED = 4, DEFAULT_SCROLL = 512, JUMP_SPEED = -18,
+            PARACHUTE_LEFT_TO_RIGHT = 19, PARACHUTE_RIGHT_TO_LEFT = -17, GUNFIRE_OFFSET = 5;
         static constexpr float ANIMATION_DELAY = .06, SLOW_ANIMATION_DELAY = .02,
-        ASCEND_GRAVITY = 0.8, DESCEND_GRAVITY = 0.2, VERT_COLLISION_GRAVITY = 1.5,
-        BULLET_SPAWN_OFFSET_FACTOR = 0.10;
+            ASCEND_GRAVITY = 0.8, DESCEND_GRAVITY = 0.2, VERT_COLLISION_GRAVITY = 1.5,
+            BULLET_SPAWN_OFFSET_FACTOR = 0.10;
         static constexpr bool VERTICAL = true, HORIZONTAL = false;
         static const sf::Vector2f SPRITE_SCALE, STARTING_POSITION;
 
@@ -54,7 +56,7 @@ class Player : public Character
         //Returns true if the character is dead
 
         //Data
-        float ySpeed, scrollOffset;
+        float scrollOffset;
         bool knifed, jumped, falling, parachute, retract;
         sf::IntRect wBounds;
         sf::Clock animTimer;

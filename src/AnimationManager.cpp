@@ -7,6 +7,15 @@ AnimationManager::AnimationManager(Animation* animations) : textures(animations)
 
 }
 
+/*
+AnimationManager::AnimationManager(const AnimationManager& aMgr) : textures(new Animation(*aMgr.textures)),
+    textureBounds(textures->getTextureBounds()), loadedTextures(textures->getLoadedTextures()),
+    currentAnimation(0), lastAnimation(0), currentOffset(0), lastOffset(0)
+{
+
+}
+*/
+
 AnimationManager::~AnimationManager()
 {
     if (textures != nullptr)

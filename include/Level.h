@@ -1,5 +1,6 @@
 /***********************************************************************************
-
+Redo the class functions to make use of the new deque data structure being using to
+hold the tiles. (random access is available)
 ***********************************************************************************/
 
 #ifndef LEVEL_H
@@ -12,8 +13,12 @@
 class Level
 {
     public:
-        Level(sf::Vector2f windowRes);
+        Level(sf::Vector2i windowRes);
+        //Constructor
         virtual ~Level();
+        //Destructor
+        //If editing mode was enabled it will save out any coordinate
+        //data for each tile to a text file that can be loaded in
         bool loadLevel(std::string fileName);
         //Loads the level from a file
         //Returns false if file could not be found
@@ -29,10 +34,9 @@ class Level
         //Returns false if the vector could not be added due to memory issues or editingMode
         void updateLevel(sf::FloatRect playerBound);
         //Updates the coordinates in tileCoords and sets the first coordinate in the queue
-        bool nextCoord();
-        //Moves the tile to the next coordinate so it can be drawn to the screen
-        //Returns false when it reaches the first coordinate in the queue since calling updateLevel()
-        const sf::Sprite& getTile() const;
+        void drawLevel(sf::RenderWindow& renderWindow);
+        //Draws the current tiles to the renderWindow
+        const sf::Sprite& getSampleTile() const;
         //Returns the Sprite tile
 
         enum BoundType {
@@ -43,8 +47,11 @@ class Level
             NO_BOUND
         };
         Level::BoundType boundsCheck(sf::Sprite& entity, const bool vert);
-        //Checks the sprite against the tileCoords
-        //Returns false if the sprite is not hitting any tiles
+        //Checks the sprite against the activeTiles and corrects its position
+        //Returns NO_BOUND if the sprite is not hitting any tiles
+        bool boundsCheck(sf::FloatRect& bounds);
+        //Checks the bounds against the activeTiles
+        //Returns false if it does not intersect
 
     private:
         //Constants
@@ -67,9 +74,9 @@ class Level
 
         //Data
         bool editingMode;
-        size_t tileCounter;
-        std::queue<sf::Sprite> activeTiles;
-        std::queue<sf::Vector2f> tileCoords;
+        //size_t tileCounter;
+        std::deque<sf::Sprite> activeTiles;
+        std::deque<sf::Vector2f> tileCoords;
         sf::Texture tileTexture;
         sf::Sprite tile;
         sf::Vector2f firstVec;

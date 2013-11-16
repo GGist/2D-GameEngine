@@ -4,10 +4,10 @@ using namespace std;
 
 const sf::Vector2f Level::SCALE(1.2, 1.2);
 const string Level::TILE_NAME("Tile (14)"), Level::TILE_PATH("res/tiles/"), Level::TILE_FORMAT(".png"),
-    Level::LEVEL_NAME("Coordinates.txt"), Level::LEVEL_PATH("res/tiles/");
+    Level::LEVEL_NAME("Level_Coords.txt"), Level::LEVEL_PATH("res/level_data/");
 
-Level::Level(sf::Vector2f windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(windowRes.y),
-    editingMode(false), tileCounter(0)
+Level::Level(sf::Vector2i windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(windowRes.y),
+    editingMode(false)
 {
     tileTexture.loadFromFile(TILE_PATH + TILE_NAME + TILE_FORMAT);
     tile.setTexture(tileTexture);
@@ -19,22 +19,21 @@ Level::Level(sf::Vector2f windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(
 Level::~Level()
 {
     if (editingMode) {
-        int numCoords;
+        int i;
         ofstream outputFile;
 
         sortTileQueue();
         removeDuplicates();
 
-        numCoords = tileCoords.size();
-
         outputFile.open((LEVEL_PATH + LEVEL_NAME).c_str());
 
-        for (int i = 0; i < numCoords - 1; i++) {
-            outputFile << "(" << tileCoords.front().x << ", " << tileCoords.front().y << ")" << endl;
-            tileCoords.pop();
+        for (i = 0; i < tileCoords.size() - 1; ++i) {
+            outputFile << "(" << tileCoords[i].x << ", "
+                       << tileCoords[i].y << ")" << endl;
         }
-        outputFile << "(" << tileCoords.front().x << ", " << tileCoords.front().y << ")";
-        tileCoords.pop();
+        //So that there is no newline at end of file
+        outputFile << "(" << tileCoords[i].x << ", "
+                       << tileCoords[i].y << ")";
 
         outputFile.close();
     }
@@ -60,7 +59,7 @@ bool Level::loadLevel(string fileName)
             inputFile.ignore();
             getline(inputFile, temp, ')');
             y = stringToType<int>(temp);
-            tileCoords.push(sf::Vector2f(x, y));
+            tileCoords.push_front(sf::Vector2f(x, y));
             inputFile.ignore();
         }
     }
@@ -72,12 +71,11 @@ bool Level::loadLevel(string fileName)
 
 void Level::clearLevel()
 {
-    while (!tileCoords.empty()) {
-        tileCoords.pop();
-    }
-    while (!activeTiles.empty()) {
-        activeTiles.pop();
-    }
+    if (!tileCoords.empty())
+        tileCoords.clear();
+
+    if (!activeTiles.empty())
+        activeTiles.clear();
 }
 
 bool Level::setEditorMode(bool mode)
@@ -97,9 +95,9 @@ bool Level::addTile(sf::Vector2f coord)
     }
 
     tile.setPosition(coord);
-    activeTiles.push(tile);
+    activeTiles.push_front(tile);
 
-    tileCoords.push(coord);
+    tileCoords.push_front(coord);
 
     return true;
 }
@@ -109,41 +107,27 @@ void Level::updateLevel(sf::FloatRect playerBound)
     if (!editingMode) {
         //Delete Old Tiles
         while (!activeTiles.empty() && playerBound.left - activeTiles.front().getGlobalBounds().left > 512) {
-            activeTiles.pop();
+            activeTiles.pop_front();
         }
 
         //Add New Tiles
         while (!tileCoords.empty() && tileCoords.front().x - playerBound.left <= SCREEN_WIDTH) {
             tile.setPosition(tileCoords.front());
-            activeTiles.push(tile);
-            tileCoords.pop();
+            activeTiles.push_front(tile);
+            tileCoords.pop_front();
         }
     }
 
-    tileCounter = 0;
 }
 
-bool Level::nextCoord()
+void Level::drawLevel(sf::RenderWindow& renderWindow)
 {
-    if (activeTiles.empty()) {
-        return false;
+    for (int i = 0; i < activeTiles.size(); ++i) {
+        renderWindow.draw(activeTiles[i]);
     }
-
-    //Remove First Element, Place At Back
-    tile = activeTiles.front();
-    activeTiles.pop();
-    activeTiles.push(tile);
-
-    if (tileCounter == activeTiles.size()) {
-        return false;
-    }
-
-    tileCounter++;
-
-    return true;
 }
 
-const sf::Sprite& Level::getTile() const
+const sf::Sprite& Level::getSampleTile() const
 {
     return tile;
 }
@@ -165,7 +149,7 @@ bool Level::sortTileQueue()
     //Push Into Array
     for (int i = 0; i < queueSize; i++) {
         sortedCoords[i] = tileCoords.front();
-        tileCoords.pop();
+        tileCoords.pop_front();
     }
 
     //Sort
@@ -193,7 +177,7 @@ bool Level::sortTileQueue()
 
     //Push Into Queue
     for (int i = 0; i < queueSize; i++)
-        tileCoords.push(sortedCoords[i]);
+        tileCoords.push_front(sortedCoords[i]);
 
     delete sortedCoords;
 
@@ -211,9 +195,9 @@ bool Level::removeDuplicates()
 
     for (int i = 0; i < queueSize; i++) {
         tempOne = tileCoords.front();
-        tileCoords.pop();
+        tileCoords.pop_front();
         if (tempOne != tileCoords.front()) {
-            tileCoords.push(tempOne);
+            tileCoords.push_front(tempOne);
         }
     }
 
@@ -231,10 +215,20 @@ T Level::stringToType(string convert)
     return value;
 }
 
+bool Level::boundsCheck(sf::FloatRect& bounds)
+{
+    for (int i = 0; i < activeTiles.size(); ++i) {
+        if (bounds.intersects(activeTiles[i].getGlobalBounds()))
+            return true;
+    }
+
+    return false;
+}
+
 Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
 {
     BoundType intersects = NO_BOUND;
-    int queueSize = activeTiles.size(), difference = 0, loopCount;
+    int difference = 0;
     sf::Sprite tempSprite;
     sf::FloatRect firstBound, secondBound, tempBound;
 
@@ -265,9 +259,9 @@ Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
         secondBound.height = entity.getGlobalBounds().height - (entity.getGlobalBounds().height * 0.30);
     }
 
-    //Pop And Push activeTiles Until Intersection Is Found Or None
-    for (loopCount = 0; loopCount < queueSize && intersects == NO_BOUND; loopCount++) {
-        tempSprite = activeTiles.front();
+    //Search activeTiles Until Intersection Is Found Or None
+    for (int i = 0; i < activeTiles.size() && intersects == NO_BOUND; ++i) {
+        tempSprite = activeTiles[i];
         tempBound = tempSprite.getGlobalBounds();
 
         if (firstBound.intersects(tempBound)) {
@@ -294,18 +288,7 @@ Level::BoundType Level::boundsCheck(sf::Sprite& entity, const bool vert)
                 entity.move(difference, 0);
                 intersects = RIGHT_BOUND;
             }
-        } else {
-            activeTiles.pop();
-            activeTiles.push(tempSprite);
-            tempSprite = activeTiles.front();
         }
-    }
-
-    //Preserve The Ordering Of activeTiles Before They Were Checked
-    for (int i = 0; i < queueSize - loopCount; i++) {
-        tempSprite = activeTiles.front();
-        activeTiles.pop();
-        activeTiles.push(tempSprite);
     }
 
     return intersects;

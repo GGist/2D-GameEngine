@@ -13,12 +13,16 @@ class Level;
 class Character
 {
     public:
-        Character(CharacterAnim* cAnim);
+        Character(CharacterAnim* aMgr);
+        //Constructor
         virtual ~Character();
+        //Destructor
         void runRight();
         //Sets xSpeed equal to RUN_SPEED
         void runLeft();
         //Sets xSpeed equal to -RUN_SPEED
+        void stopRun();
+        //Sets xSpeed equal to 0
         void shoot();
         //Causes the player to shoot a projectile from the active gun
         bool isDead();
@@ -31,11 +35,11 @@ class Character
         virtual bool applySpeed(Level& currentLevel) = 0;
         //Moves the sprite based on the current speed
         //
-        const std::vector<Projectile>& getProjectiles() const;
-        //Returns the projectiles vector object
+        void drawProjectiles(sf::RenderWindow& renderWindow) const;
+        //
         const sf::Sprite& getSprite() const;
         //Returns the currentSprite object
-        const int getCurrentRunSpeed() const;
+        int getCurrentRunSpeed() const;
         //Returns current run speed
 
     protected:
@@ -70,7 +74,7 @@ class Character
         //Data
         AnimationManager* aManager;
         CharTracking currentTracking, lastTracking;
-        float xCoord, yCoord, xSpeed, speedModifier;
+        float xCoord, yCoord, xSpeed, ySpeed, speedModifier;
         bool shot, died, facingRight, stateLock;
         sf::Sprite currentSprite, lastSprite;
 

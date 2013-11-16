@@ -7,7 +7,7 @@ const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200
 
 //Could Add A Factory For AnimationManager (or PlayerAnim to allows resource sharing for multiple players)
 Player::Player(sf::Vector2i windowBounds) : Character(new PlayerAnim), wBounds(sf::Vector2i(0, 0),
-    windowBounds), ySpeed(0), scrollOffset(DEFAULT_SCROLL), knifed(false), jumped(false), falling(false),
+    windowBounds), scrollOffset(DEFAULT_SCROLL), knifed(false), jumped(false), falling(false),
     parachute(false), retract(false), animTimer()
 {
     aManager->setTexture(PlayerAnim::STAND_RIGHT);
@@ -79,8 +79,6 @@ bool Player::checkProjectiles(Level& currentLevel)
         createProjectile(spawnPoint, shootingRight);
 
         shotOnce = true;
-
-        return true;
     } else {
         shotOnce = false;
     }
@@ -94,9 +92,8 @@ bool Player::checkAnimation()
 
     if (shot || knifed || parachute || retract) {
         //Fast Looped Animation
-        if (animTimer.getElapsedTime().asSeconds() > SLOW_ANIMATION_DELAY) {
+        if (animTimer.getElapsedTime().asSeconds() > SLOW_ANIMATION_DELAY)
             updateAnim = true;
-        }
     } else if (!jumped && (aManager->getCurrentAnimation() == PlayerAnim::PARACHUTE_LEFT ||
                            aManager->getCurrentAnimation() == PlayerAnim::PARACHUTE_RIGHT)) {
         //If Finished Jumping
@@ -126,9 +123,6 @@ bool Player::checkAnimation()
 
 bool Player::applySpeed(Level& currentLevel)
 {
-    if (aManager == nullptr)
-        return false;
-
     bool scroll = false;
     Level::BoundType horiz, vert;
 
@@ -166,7 +160,6 @@ bool Player::applySpeed(Level& currentLevel)
             scroll = true;
         }
     }
-    xSpeed = 0;
 
     currentSprite.setPosition(xCoord, yCoord);
 
@@ -213,9 +206,8 @@ bool Player::updateCoordTracking()
     int cAnimIndex = aManager->getBounds(aManager->getCurrentAnimation()).first + aManager->getCurrentOffset();
     int lAnimIndex = aManager->getBounds(aManager->getLastAnimation()).first + aManager->getLastOffset();
 
-    if (cAnimIndex == lAnimIndex) {
+    if (cAnimIndex == lAnimIndex)
         return false;
-    }
 
     lastTracking = currentTracking;
 
@@ -326,11 +318,10 @@ int Player::getDefaultRunSpeed() const
 
 bool Player::checkForDeath()
 {
-    if (getSprite().getGlobalBounds().top > wBounds.top + wBounds.height) {
+    if (getSprite().getGlobalBounds().top > wBounds.top + wBounds.height)
         died = true;
-    } //else if {
+    //else if
         //Got Shot
-    //}
 
     return died;
 }
