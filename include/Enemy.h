@@ -50,8 +50,6 @@ class Enemy : public Character
         //Returns false if checkAnimation() returns false
         virtual int getDefaultRunSpeed() const;
         //Returns a default run speed constant
-        virtual bool checkForDeath();
-        //Checks if the character should be dead or not
 
         //Data
         sf::Clock shotTimer, animTimer;

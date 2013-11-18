@@ -3,10 +3,10 @@
 
 using namespace std;
 
-Character::Character(CharacterAnim* cAnim) : aManager(new AnimationManager(cAnim)),
+Character::Character(const CharacterAnim* cAnim) : aManager(cAnim),
     pManager(), currentTracking(BOTTOM_RIGHT), lastTracking(BOTTOM_RIGHT), shot(false),
-    died(false), facingRight(true), stateLock(false), xCoord(0), yCoord(0), xSpeed(0),
-    speedModifier(0), currentSprite(), lastSprite()
+    facingRight(true), stateLock(false), xCoord(0), yCoord(0), xSpeed(0), speedModifier(0),
+    currentSprite(), lastSprite()
 {
 
 }
@@ -41,14 +41,14 @@ void Character::shoot()
     }
 }
 
-bool Character::isDead()
+bool Character::checkShot(const sf::FloatRect& bounds)
 {
-    return died;
+    return pManager.boundsCheck(bounds);
 }
 
 void Character::drawProjectiles(sf::RenderWindow& renderWindow) const
 {
-    vector<Projectile> projectiles = pManager.getProjectiles();
+    const vector<Projectile>& projectiles = pManager.getProjectiles();
 
     for (int i = 0; i < projectiles.size(); ++i) {
         renderWindow.draw(projectiles[i].proj);
@@ -60,6 +60,11 @@ const sf::Sprite& Character::getSprite() const
     return currentSprite;
 }
 
+ProjectileManager& Character::getProjManager()
+{
+    return pManager;
+}
+
 int Character::getCurrentRunSpeed() const
 {
     return xSpeed;
@@ -67,9 +72,9 @@ int Character::getCurrentRunSpeed() const
 
 void Character::updateState()
 {
-    int cAnimIndex = aManager->getBounds(aManager->getCurrentAnimation()).first + aManager->getCurrentOffset();
+    int cAnimIndex = aManager.getBounds(aManager.getCurrentAnimation()).first + aManager.getCurrentOffset();
 
-    if (shot && cAnimIndex == aManager->getBounds(aManager->getCurrentAnimation()).last) {
+    if (shot && cAnimIndex == aManager.getBounds(aManager.getCurrentAnimation()).last) {
         shot = false;
         stateLock = false;
     }
@@ -77,8 +82,8 @@ void Character::updateState()
 
 bool Character::updateCoordTracking()
 {
-    int cAnimIndex = aManager->getBounds(aManager->getCurrentAnimation()).first + aManager->getCurrentOffset();
-    int lAnimIndex = aManager->getBounds(aManager->getLastAnimation()).first + aManager->getLastOffset();
+    int cAnimIndex = aManager.getBounds(aManager.getCurrentAnimation()).first + aManager.getCurrentOffset();
+    int lAnimIndex = aManager.getBounds(aManager.getLastAnimation()).first + aManager.getLastOffset();
 
     if (cAnimIndex == lAnimIndex) {
         return false;
@@ -87,9 +92,9 @@ bool Character::updateCoordTracking()
     lastTracking = currentTracking;
 
     //Special Cases
-    if (lAnimIndex == aManager->getBounds(CharacterAnim::SHOOT_LEFT).last) {
+    if (lAnimIndex == aManager.getBounds(CharacterAnim::SHOOT_LEFT).last) {
         currentTracking = BOTTOM_RIGHT;
-    } else if (lAnimIndex == aManager->getBounds(CharacterAnim::SHOOT_RIGHT).last) {
+    } else if (lAnimIndex == aManager.getBounds(CharacterAnim::SHOOT_RIGHT).last) {
         currentTracking = BOTTOM_LEFT;
     } else {
         //Other Cases
@@ -144,31 +149,31 @@ bool Character::updateProjectiles(Level& currentLevel)
 
 bool Character::updateAnimation()
 {
-    int cAnim = aManager->getCurrentAnimation(),
-        cOff = aManager->getCurrentOffset();
+    int cAnim = aManager.getCurrentAnimation(),
+        cOff = aManager.getCurrentOffset();
 
     if (shot) {
         if (cAnim != CharacterAnim::SHOOT_LEFT && cAnim != CharacterAnim::SHOOT_RIGHT) {
             //Transition To First Shoot Animation
             if (facingRight) {
-                aManager->setTexture(CharacterAnim::SHOOT_RIGHT);
+                aManager.setTexture(CharacterAnim::SHOOT_RIGHT);
             } else {
-                aManager->setTexture(CharacterAnim::SHOOT_LEFT);
+                aManager.setTexture(CharacterAnim::SHOOT_LEFT);
             }
         } else {
             //Transition To First Animation Or Advance Animation
-            if (aManager->getBounds(cAnim).first + cOff == aManager->getBounds(cAnim).last) {
+            if (aManager.getBounds(cAnim).first + cOff == aManager.getBounds(cAnim).last) {
                 //From Last Animation To First Animation
                 if (facingRight) {
-                    aManager->setTexture(CharacterAnim::SHOOT_RIGHT);
+                    aManager.setTexture(CharacterAnim::SHOOT_RIGHT);
                 } else {
-                    aManager->setTexture(CharacterAnim::SHOOT_LEFT);
+                    aManager.setTexture(CharacterAnim::SHOOT_LEFT);
                 }
             } else {
-                aManager->setNextTexture();
+                aManager.setNextTexture();
 
                 //This only needs to be done for "blocking" animations that cannot go from left to right or vice versa mid animation
-                if (aManager->getCurrentAnimation() == CharacterAnim::SHOOT_RIGHT)
+                if (aManager.getCurrentAnimation() == CharacterAnim::SHOOT_RIGHT)
                     facingRight = true;
                 else
                     facingRight = false;
@@ -178,38 +183,38 @@ bool Character::updateAnimation()
         if (xSpeed > 0) {
             //Running Right
             if (cAnim != CharacterAnim::RUN_RIGHT) {
-                aManager->setTexture(CharacterAnim::RUN_RIGHT);
+                aManager.setTexture(CharacterAnim::RUN_RIGHT);
             } else {
                 //Transition To First Animation Or Advance Animation
-                if (aManager->getBounds(cAnim).first + cOff == aManager->getBounds(cAnim).last) {
-                    aManager->setTexture(CharacterAnim::RUN_RIGHT);
+                if (aManager.getBounds(cAnim).first + cOff == aManager.getBounds(cAnim).last) {
+                    aManager.setTexture(CharacterAnim::RUN_RIGHT);
                 } else {
-                    aManager->setNextTexture();
+                    aManager.setNextTexture();
                 }
             }
         } else if (xSpeed < 0) {
             //Running Left
             if (cAnim != CharacterAnim::RUN_LEFT) {
-                aManager->setTexture(CharacterAnim::RUN_LEFT);
+                aManager.setTexture(CharacterAnim::RUN_LEFT);
             } else {
                 //Transition To First Animation Or Advance Animation
-                if (aManager->getBounds(cAnim).first + cOff == aManager->getBounds(cAnim).last) {
-                    aManager->setTexture(CharacterAnim::RUN_LEFT);
+                if (aManager.getBounds(cAnim).first + cOff == aManager.getBounds(cAnim).last) {
+                    aManager.setTexture(CharacterAnim::RUN_LEFT);
                 } else {
-                    aManager->setNextTexture();
+                    aManager.setNextTexture();
                 }
             }
         } else {
             //Transition To Standing Position
             if (facingRight) {
-                aManager->setTexture(CharacterAnim::STAND_RIGHT);
+                aManager.setTexture(CharacterAnim::STAND_RIGHT);
             } else {
-                aManager->setTexture(CharacterAnim::STAND_LEFT);
+                aManager.setTexture(CharacterAnim::STAND_LEFT);
             }
         }
     }
 
-    currentSprite.setTexture(aManager->getCurrentTexture(), true);
+    currentSprite.setTexture(aManager.getCurrentTexture(), true);
 
     return true;
 }

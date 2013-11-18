@@ -32,8 +32,12 @@ class EnemyManager
         //Updates the enemies that are currently on the screen
         void drawEnemies(sf::RenderWindow& renderWindow);
         //Draws the enemies and their projectiles to the renderWindow
+        bool checkShot(const sf::FloatRect& entityBounds, ProjectileManager& entityBullets);
+        //Removes any enemys that intersects with entityBullets
+        //Returns true if any of the enemy's bullets are within the entityBounds
         Enemy& getSampleEnemy();
         //Returns a sample enemy textured sprite
+
     private:
         //Constants
         static const std::string ENEMY_DATA_PATH, ENEMY_DATA_NAME;
@@ -47,8 +51,6 @@ class EnemyManager
         //Returns the converted value
 
         //Data
-        std::vector<sf::RectangleShape> enemyBounds;
-
         bool editingMode;
         std::vector<Enemy> activeEnemies;
         std::vector<sf::Vector2f> enemyCoords;

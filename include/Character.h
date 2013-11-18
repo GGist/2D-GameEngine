@@ -13,7 +13,7 @@ class Level;
 class Character
 {
     public:
-        Character(CharacterAnim* aMgr);
+        Character(const CharacterAnim* cAnim);
         //Constructor
         virtual ~Character();
         //Destructor
@@ -35,10 +35,14 @@ class Character
         virtual bool applySpeed(Level& currentLevel) = 0;
         //Moves the sprite based on the current speed
         //
+        bool checkShot(const sf::FloatRect& bounds);
+        //Returns true if any of the character's bullets are within the bounds
         void drawProjectiles(sf::RenderWindow& renderWindow) const;
         //
         const sf::Sprite& getSprite() const;
         //Returns the currentSprite object
+        ProjectileManager& getProjManager();
+        //Returns the sprite's projectile manager
         int getCurrentRunSpeed() const;
         //Returns current run speed
 
@@ -68,14 +72,12 @@ class Character
         //Returns false if checkAnimation() returns false
         virtual int getDefaultRunSpeed() const = 0;
         //Returns a default run speed constant
-        virtual bool checkForDeath() = 0;
-        //Returns true if the character is dead
 
         //Data
-        AnimationManager* aManager;
+        AnimationManager aManager;
         CharTracking currentTracking, lastTracking;
         float xCoord, yCoord, xSpeed, ySpeed, speedModifier;
-        bool shot, died, facingRight, stateLock;
+        bool shot, facingRight, stateLock;
         sf::Sprite currentSprite, lastSprite;
 
     private:

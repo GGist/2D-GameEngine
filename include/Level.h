@@ -74,7 +74,6 @@ class Level
 
         //Data
         bool editingMode;
-        //size_t tileCounter;
         std::deque<sf::Sprite> activeTiles;
         std::deque<sf::Vector2f> tileCoords;
         sf::Texture tileTexture;

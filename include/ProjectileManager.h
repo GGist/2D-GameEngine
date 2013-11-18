@@ -4,15 +4,17 @@
 #include <SFML/Graphics.hpp>
 #include <iostream>
 #include <fstream>
+#include <AnimationManager.h>
 
 class Level;
 
 //Container For Individual Projectiles
 struct Projectile {
     Projectile(sf::Sprite p, bool d) :
-        proj(p), goingRight(d) {}
+        proj(p), goingRight(d), offset(0) {}
     sf::Sprite proj;
     bool goingRight;
+    int offset;
 };
 
 class ProjectileManager
@@ -20,6 +22,8 @@ class ProjectileManager
     public:
         ProjectileManager();
         //Constructor
+        //ProjectileManager(const ProjectileManager& pManager);
+        //Copy Constructor
         virtual ~ProjectileManager();
         //Destructor
         void addProjectile(sf::Vector2f starting, bool right);
@@ -40,22 +44,20 @@ class ProjectileManager
             RIGHT_BOUND,
             NO_BOUND
         };
-        bool boundsCheck(sf::Sprite& entity);
+        bool boundsCheck(const sf::FloatRect& entity);
         //Checks the sprite against the currentProjectiles
         //Returns false if the sprite is not hitting any projectiles
 
     private:
         //Constants
-        static const int NUM_ANIMATIONS = 4, SPEED = 10, SCALE = 4, SCREEN_WIDTH = 1280;
+        static const int SPEED = 10, SCALE = 4, SCREEN_WIDTH = 1280;
         static const std::string SPRITE_MANIFEST, SPRITE_PATH, SPRITE_FORMAT;
 
         //Data
         int numProjectiles;
+        AnimationManager aManager;
         std::vector<Projectile> currentProjectiles;
-        //std::vector<sf::Sprite> currentProjectiles;
-        //std::vector<bool> currentDirections;
-        //Utilize AnimationManager in the future
-        sf::Texture projectileTextures[NUM_ANIMATIONS];
+        sf::Sprite bullet;
 };
 
 #endif // PROJECTILE_H

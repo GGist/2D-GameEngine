@@ -1,5 +1,6 @@
 #include "Animation.h"
 
+const std::string BulletAnim::PATH("res/projectiles/"), BulletAnim::MANIFEST("~Manifest.txt"), BulletAnim::FORMAT(".png");
 const std::string PlayerAnim::PATH("res/anims/player/"), PlayerAnim::MANIFEST("~Manifest.txt"), PlayerAnim::FORMAT(".png");
 const std::string EnemyAnim::PATH("res/anims/enemy/"), EnemyAnim::MANIFEST("~Manifest.txt"), EnemyAnim::FORMAT(".png");
 
@@ -45,17 +46,22 @@ void Animation::loadTextures(const std::string& path, const std::string& manifes
     textureManifest.close();
 }
 
-const std::vector<AnimBound>& Animation::getTextureBounds()
+const std::vector<AnimBound>& Animation::getTextureBounds() const
 {
     return textureBounds;
 }
 
-const std::vector<sf::Texture>& Animation::getLoadedTextures()
+const std::vector<sf::Texture>& Animation::getLoadedTextures() const
 {
     return loadedTextures;
 }
 
 //Derived Classes
+BulletAnim::BulletAnim()
+{
+    loadTextures(PATH, MANIFEST, FORMAT);
+}
+
 CharacterAnim::CharacterAnim(const std::string& path, const std::string& manifest, const std::string& format)
 {
     loadTextures(path, manifest, format);

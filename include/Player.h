@@ -5,6 +5,7 @@
 #ifndef PLAYER_H
 #define PLAYER_H
 
+#include <memory>
 #include <Character.h>
 
 class Player : public Character
@@ -52,8 +53,6 @@ class Player : public Character
         //Returns false if checkAnimation() returns false
         virtual int getDefaultRunSpeed() const;
         //Returns a default run speed constant
-        virtual bool checkForDeath();
-        //Returns true if the character is dead
 
         //Data
         float scrollOffset;

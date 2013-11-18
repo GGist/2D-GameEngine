@@ -1,27 +1,33 @@
 #include "AnimationManager.h"
 
-AnimationManager::AnimationManager(Animation* animations) : textures(animations),
-    textureBounds(textures->getTextureBounds()), loadedTextures(textures->getLoadedTextures()),
+AnimationManager::AnimationManager(const Animation* anim) : textures(anim),
+    textureBounds(&textures->getTextureBounds()), loadedTextures(&textures->getLoadedTextures()),
     currentAnimation(0), lastAnimation(0), currentOffset(0), lastOffset(0)
 {
 
 }
 
-/*
-AnimationManager::AnimationManager(const AnimationManager& aMgr) : textures(new Animation(*aMgr.textures)),
-    textureBounds(textures->getTextureBounds()), loadedTextures(textures->getLoadedTextures()),
-    currentAnimation(0), lastAnimation(0), currentOffset(0), lastOffset(0)
+AnimationManager::AnimationManager(const AnimationManager& aMgr) : textures(aMgr.textures),
+    textureBounds(&textures->getTextureBounds()), loadedTextures(&textures->getLoadedTextures()),
+    currentAnimation(aMgr.currentAnimation), lastAnimation(aMgr.lastAnimation), currentOffset(aMgr.currentOffset),
+    lastOffset(aMgr.lastOffset)
 {
 
 }
-*/
+
+AnimationManager& AnimationManager::operator=(const AnimationManager& rhs)
+{
+    if (this != &rhs) {
+        AnimationManager aMgr(rhs);
+        swapMembers(aMgr);
+    }
+
+    return *this;
+}
 
 AnimationManager::~AnimationManager()
 {
-    if (textures != nullptr)
-        delete textures;
 
-    textures = nullptr;
 }
 
 bool AnimationManager::setTexture(const int anim, const int offset)
@@ -55,12 +61,12 @@ const sf::Texture& AnimationManager::getTexture(const int anim, const int offset
     if (outOfBounds(anim, offset))
         throw "Bad Bounds: AnimationManager::getTexture";
 
-    return loadedTextures[getBounds(getCurrentAnimation()).first + getCurrentOffset()];
+    return (*loadedTextures)[getBounds(getCurrentAnimation()).first + getCurrentOffset()];
 }
 
 const sf::Texture& AnimationManager::getCurrentTexture()
 {
-    return loadedTextures[getBounds(getCurrentAnimation()).first + getCurrentOffset()];
+    return (*loadedTextures)[getBounds(getCurrentAnimation()).first + getCurrentOffset()];
 }
 
 int AnimationManager::getCurrentAnimation()
@@ -85,15 +91,26 @@ int AnimationManager::getLastOffset()
 
 AnimBound AnimationManager::getBounds(const int anim)
 {
-    return textureBounds[anim];
+    return (*textureBounds)[anim];
 }
 
  bool AnimationManager::outOfBounds(const int& anim, const int& offset)
  {
     int newTextureIndex = getBounds(anim).first + offset;
 
-    if (anim < 0 || anim > textureBounds.size() || newTextureIndex > textureBounds.back().last)
+    if (anim < 0 || anim > textureBounds->size() || newTextureIndex > textureBounds->back().last)
         return true;
 
     return false;
+ }
+
+ void AnimationManager::swapMembers(AnimationManager& aMgr)
+ {
+     std::swap(textures, aMgr.textures);
+     std::swap(textureBounds, aMgr.textureBounds);
+     std::swap(loadedTextures, aMgr.loadedTextures);
+     std::swap(currentAnimation, aMgr.currentAnimation);
+     std::swap(lastAnimation, aMgr.lastAnimation);
+     std::swap(currentOffset, aMgr.currentOffset);
+     std::swap(lastOffset, aMgr.lastOffset);
  }

@@ -5,14 +5,21 @@ const sf::Vector2f Enemy::SPRITE_SCALE(1.4, 1.4);
 
 using namespace std;
 
-Enemy::Enemy(sf::Vector2f startingPos) : Character(new EnemyAnim),
+static const EnemyAnim* getEnemyAnim()
+{
+    static EnemyAnim* eAnim = new EnemyAnim;
+
+    return eAnim;
+}
+
+Enemy::Enemy(sf::Vector2f startingPos) : Character(getEnemyAnim()),
     shotTimer(), animTimer()
 {
-    aManager->setTexture(EnemyAnim::STAND_RIGHT);
+    aManager.setTexture(EnemyAnim::STAND_RIGHT);
 
     xSpeed = getDefaultRunSpeed();
 
-    currentSprite.setTexture(aManager->getCurrentTexture(), true);
+    currentSprite.setTexture(aManager.getCurrentTexture(), true);
     currentSprite.setPosition(startingPos);
     currentSprite.setScale(SPRITE_SCALE);
 
@@ -49,12 +56,12 @@ bool Enemy::checkProjectiles(Level& currentLevel)
 {
     sf::Vector2f spawnPoint;
     bool shootingRight, shotLast = false,
-        shootingAnimation = ((aManager->getBounds(aManager->getCurrentAnimation()).first +
-                             aManager->getCurrentOffset()) ==
-                             aManager->getBounds(aManager->getCurrentAnimation()).last - 1);
+        shootingAnimation = ((aManager.getBounds(aManager.getCurrentAnimation()).first +
+                             aManager.getCurrentOffset()) ==
+                             aManager.getBounds(aManager.getCurrentAnimation()).last - 1);
 
     if (shot && shootingAnimation && shotTimer.getElapsedTime().asSeconds() > SHOOT_CD) {
-        if (aManager->getCurrentAnimation() == EnemyAnim::SHOOT_LEFT) {
+        if (aManager.getCurrentAnimation() == EnemyAnim::SHOOT_LEFT) {
             spawnPoint.x = getSprite().getGlobalBounds().left;
             shootingRight = false;
         } else {
@@ -136,8 +143,6 @@ bool Enemy::applySpeed(Level& currentLevel)
     currentLevel.boundsCheck(currentSprite, HORIZONTAL);
     currentLevel.boundsCheck(currentSprite, VERTICAL);
 
-    checkForDeath();
-
     return horiz != Level::NO_BOUND;
 }
 
@@ -153,8 +158,8 @@ void Enemy::updateState()
 
 bool Enemy::updateAnimation()
 {
-    int cAnim = aManager->getCurrentAnimation(),
-        cOff = aManager->getCurrentOffset();
+    int cAnim = aManager.getCurrentAnimation(),
+        cOff = aManager.getCurrentOffset();
 
     lastSprite = currentSprite;
 
@@ -163,29 +168,29 @@ bool Enemy::updateAnimation()
         if (cAnim != EnemyAnim::SHOOT_LEFT && cAnim != EnemyAnim::SHOOT_RIGHT) {
             //Transition To First Shoot Animation
             if (facingRight) {
-                aManager->setTexture(EnemyAnim::SHOOT_RIGHT);
+                aManager.setTexture(EnemyAnim::SHOOT_RIGHT);
             } else {
-                aManager->setTexture(EnemyAnim::SHOOT_LEFT);
+                aManager.setTexture(EnemyAnim::SHOOT_LEFT);
             }
-        } else if (aManager->getBounds(cAnim).first + cOff != aManager->getBounds(cAnim).last) {
+        } else if (aManager.getBounds(cAnim).first + cOff != aManager.getBounds(cAnim).last) {
             //Transition To Next Animation
-            aManager->setNextTexture();
+            aManager.setNextTexture();
 
             //This only needs to be done for "blocking" animations that cannot go from left to right or vice versa mid animation
-            if (aManager->getCurrentAnimation() == EnemyAnim::SHOOT_RIGHT)
+            if (aManager.getCurrentAnimation() == EnemyAnim::SHOOT_RIGHT)
                 facingRight = true;
             else
                 facingRight = false;
         } else {
             //Repeated Shooting
-            aManager->setTexture(aManager->getCurrentAnimation(), aManager->getCurrentOffset() - 1);
+            aManager.setTexture(aManager.getCurrentAnimation(), aManager.getCurrentOffset() - 1);
         }
     } else {
         //Running Left Or Right
         Character::updateAnimation();
     }
 
-    currentSprite.setTexture(aManager->getCurrentTexture(), true);
+    currentSprite.setTexture(aManager.getCurrentTexture(), true);
 
     return true;
 }
@@ -203,13 +208,4 @@ bool Enemy::getShotStatus()
 bool Enemy::isFacingRight()
 {
     return facingRight;
-}
-
-bool Enemy::checkForDeath()
-{
-    //if {
-        //Got Shot
-    //}
-
-    return died;
 }

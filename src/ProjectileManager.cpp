@@ -3,22 +3,17 @@
 
 using namespace std;
 
-const string ProjectileManager::SPRITE_MANIFEST("~Manifest.txt"), ProjectileManager::SPRITE_PATH("res/projectiles/"), ProjectileManager::SPRITE_FORMAT(".png");
-
-ProjectileManager::ProjectileManager() : numProjectiles(0)
+static const BulletAnim* getBulletAnim()
 {
-    ifstream projectileManifest;
-    string fileName;
-    int animCount = 0;
+    static BulletAnim* bAnim = new BulletAnim;
 
-    projectileManifest.open((SPRITE_PATH + SPRITE_MANIFEST).c_str());
+    return bAnim;
+}
 
-    while (projectileManifest >> fileName) {
-        projectileTextures[animCount].loadFromFile(SPRITE_PATH + fileName + SPRITE_FORMAT);
-        animCount++;
-    }
-
-    projectileManifest.close();
+ProjectileManager::ProjectileManager() : numProjectiles(0), aManager(getBulletAnim())
+{
+    aManager.setTexture(BulletAnim::BULLET);
+    bullet.setTexture(aManager.getCurrentTexture());
 }
 
 ProjectileManager::~ProjectileManager()
@@ -28,9 +23,9 @@ ProjectileManager::~ProjectileManager()
 
 void ProjectileManager::addProjectile(sf::Vector2f starting, bool right)
 {
-    currentProjectiles.push_back(Projectile(sf::Sprite(projectileTextures[0]), right));
+    bullet.setPosition(starting);
+    currentProjectiles.push_back(Projectile(bullet, right));
 
-    currentProjectiles[numProjectiles].proj.setPosition(starting);
     currentProjectiles[numProjectiles].proj.setScale(SCALE, SCALE);
     numProjectiles++;
 }
@@ -42,10 +37,9 @@ bool ProjectileManager::moveProjectiles(Level& currentLevel, sf::FloatRect playe
 
     int index = 0;
 
-    //Was Familiarizing Myself With Lambdas, Maybe Not The Best Application
-        //Note: Access to member variables works inside lambdas because internally they are called through the *this pointer
+    //Note: Access to member variables works inside lambdas because internally they are called through the *this pointer
     for_each(currentProjectiles.begin(), currentProjectiles.end(), [&currentLevel, &playerBounds, &index, this] (Projectile& projectile) {
-        if (projectile.proj.getTexture() == &projectileTextures[0]) {
+        if (projectile.proj.getTexture() == &aManager.getTexture(BulletAnim::BULLET)) {
             //Still Going Through The Air
             if (projectile.goingRight) {
                 //Going Right
@@ -63,13 +57,14 @@ bool ProjectileManager::moveProjectiles(Level& currentLevel, sf::FloatRect playe
                 projectile.proj.setTexture(*(projectile.proj.getTexture() + 1));
             }
 
-        } else if (projectile.proj.getTexture() != &projectileTextures[NUM_ANIMATIONS - 1]) {
+        } else if (projectile.offset != aManager.getBounds(BulletAnim::BULLET).last - 1) {
                 //Currently In One Of The Destruction Animations
-                 projectile.proj.setTexture(*(projectile.proj.getTexture() + 1));
+                ++projectile.offset;
+                 projectile.proj.setTexture(aManager.getTexture(BulletAnim::BULLET, projectile.offset));
         } else {
                 //On Last Animation, Delete The Sprite And Direction Bool
                 currentProjectiles.erase(currentProjectiles.begin() + index);
-                numProjectiles--;
+                --numProjectiles;
         }
         index++;
     });
@@ -82,16 +77,24 @@ const std::vector<Projectile>& ProjectileManager::getProjectiles() const
     return currentProjectiles;
 }
 
-bool ProjectileManager::boundsCheck(sf::Sprite& entity)
+bool ProjectileManager::boundsCheck(const sf::FloatRect& entity)
 {
     bool collision = false;
 
-    remove_if(currentProjectiles.begin(), currentProjectiles.end(), [&entity, &collision, this] (const Projectile& projectile) {
-        if (projectile.proj.getGlobalBounds().intersects(entity.getGlobalBounds()))
-            collision = true;
+    //Move projectiles that are to be deleted to the end
+    auto new_end = remove_if(currentProjectiles.begin(), currentProjectiles.end(),
+                             [&entity, &collision, this] (const Projectile& projectile) {
+                             if (projectile.proj.getGlobalBounds().intersects(entity)) {
+                                collision = true;
+                                --numProjectiles;
+                                return true;
+                            }
 
-        return collision;
-    });
+                            return false;
+                            });
+
+    //Erase the projectiles
+    currentProjectiles.erase(new_end, currentProjectiles.end());
 
     return collision;
 }

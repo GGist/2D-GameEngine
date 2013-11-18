@@ -10,8 +10,12 @@
 class AnimationManager
 {
     public:
-        AnimationManager(Animation* animations);
+        AnimationManager(const Animation* anim);
         //Constructor
+        AnimationManager(const AnimationManager& aMgr);
+        //Copy Constructor (Deep Copy)
+        AnimationManager& operator=(const AnimationManager& rhs);
+        //Assignment Operator (Deep Copy)
         virtual ~AnimationManager();
         //Destructor
         bool setTexture(const int anim, const int offset = 0);
@@ -45,10 +49,12 @@ class AnimationManager
     private:
         bool outOfBounds(const int& anim, const int& offset);
         //Returns true if the parameters are out of bounds
+        void swapMembers(AnimationManager& aMgr);
+        //Performs member-wise swap of data members
 
-        Animation* textures;
-        const std::vector<AnimBound>& textureBounds;
-        const std::vector<sf::Texture>& loadedTextures;
+        const Animation* textures;
+        const std::vector<AnimBound>* textureBounds;
+        const std::vector<sf::Texture>* loadedTextures;
         int currentAnimation, lastAnimation;
         int currentOffset, lastOffset;
 };

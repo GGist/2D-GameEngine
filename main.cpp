@@ -6,10 +6,11 @@
 
 using namespace std;
 
-const int X_RES = 1280, Y_RES = 720, FPS = 60, ICON_X_SIZE = 48, ICON_Y_SIZE = 63, BOUNDS_THICKNESS = 3;
+const sf::Vector2i SCREEN_RES(1280, 720), ICON_RES(48, 63);
+const int BOUNDS_THICKNESS = 3, FPS = 60;
 const string WINDOW_TITLE = "SFML-Shooter", WINDOW_ICON = "res/icon.png",
     LEVEL_BACKGROUND = "res/backgrounds/level_background.png", LEVEL_DATA = "res/level_data/Level_Coords.txt";
-const bool SHOW_PLAYER_BOUNDS = false;
+const bool SHOW_PLAYER_BOUNDS = true;
 
 void frameLimiter(sf::Time previousTime);
 //This function will wait the appropriate time so that the framerate of the game
@@ -27,34 +28,38 @@ int main()
 {
     char userResponse;
 
-    //Window Settings
-    sf::RenderWindow mainWindow(sf::VideoMode(X_RES, Y_RES), WINDOW_TITLE);
-    sf::Image icon;
-    icon.loadFromFile(WINDOW_ICON);
-    mainWindow.setIcon(ICON_X_SIZE, ICON_Y_SIZE, icon.getPixelsPtr());
-    mainWindow.setVisible(false);
-    //Scroll Settings
-    sf::View mainWindowScroll(sf::FloatRect(0, 0, X_RES, Y_RES));
-    //Background Settings
-    sf::Texture backgroundImage;
-    sf::Sprite background;
-    backgroundImage.loadFromFile(LEVEL_BACKGROUND);
-    background.setTexture(backgroundImage);
+    while (true) {
+        //Window Settings
+        sf::RenderWindow mainWindow(sf::VideoMode(SCREEN_RES.x, SCREEN_RES.y), WINDOW_TITLE);
+        sf::Image icon;
+        icon.loadFromFile(WINDOW_ICON);
+        mainWindow.setIcon(ICON_RES.x, ICON_RES.y, icon.getPixelsPtr());
+        mainWindow.setVisible(false);
+        //Scroll Settings
+        sf::View mainWindowScroll(sf::FloatRect(0, 0, SCREEN_RES.x, SCREEN_RES.y));
+        //Background Settings
+        sf::Texture backgroundImage;
+        sf::Sprite background;
+        backgroundImage.loadFromFile(LEVEL_BACKGROUND);
+        background.setTexture(backgroundImage);
 
-    //Will put in a graphical menu in the future with fullscreen capability
-    //Display Menu
-    do {
-        cout << "Enter 'G' to play the game or 'E' to open the level editor: ";
-        cin >> userResponse;
-        userResponse = toupper(userResponse);
-    } while (userResponse != 'G' && userResponse != 'E');
+        //Will put in a graphical menu in the future with fullscreen capability
+        //Display Menu
+        do {
+            cout << "Enter 'G' to play the game, 'E' to open the level editor, or 'Q' to quit: ";
+            cin >> userResponse;
+            userResponse = toupper(userResponse);
+        } while (userResponse != 'G' && userResponse != 'E' && userResponse != 'Q');
 
-    mainWindow.setVisible(true);
+        mainWindow.setVisible(true);
 
-    if (userResponse == 'E') {
-        editLevel(mainWindow, mainWindowScroll, background);
-    } else {
-        playLevel(mainWindow, mainWindowScroll, background);
+        if (userResponse == 'E') {
+            if (!editLevel(mainWindow, mainWindowScroll, background))
+                return 0;
+        } else {
+            if (!playLevel(mainWindow, mainWindowScroll, background))
+                return 0;
+        }
     }
 
     return 0;
@@ -72,8 +77,10 @@ void frameLimiter(sf::Time previousTime)
 {
     sf::Clock currentWait;
 
-    while (currentWait.getElapsedTime().asSeconds() < abs((1.0 / FPS) - previousTime.asSeconds())) {
-
+    //Dont wait if the last render took longer than it should have
+    if (previousTime.asSeconds() < abs(1.0 / FPS)) {
+        while (currentWait.getElapsedTime().asSeconds() < abs((1.0 / FPS) - previousTime.asSeconds())) {
+        }
     }
 }
 
@@ -84,7 +91,7 @@ void frameLimiter(sf::Time previousTime)
 ***********************************************************************************/
 bool editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite background)
 {
-    Level level(sf::Vector2i(X_RES, Y_RES));
+    Level level(SCREEN_RES);
     const int TILE_WIDTH = level.getSampleTile().getGlobalBounds().width;
     int x, y, lastX, lastY, scroll = 0;
     bool held = false, windowFocused = true;
@@ -155,18 +162,21 @@ bool editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
 
 bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite background)
 {
-    Player hero(sf::Vector2i(X_RES, Y_RES));
-    Level level(sf::Vector2i(X_RES, Y_RES));
+    Player hero(SCREEN_RES);
+    EnemyManager eManager(SCREEN_RES);
+    Level level(SCREEN_RES);
     int totalOffset = 0;
-    int test = 0;
     bool windowFocused = true;
     sf::Event mainEvent;
     sf::Clock timeStep;
+    int test = 0;
     sf::Clock testC;
 
-
-    EnemyManager eManager(sf::Vector2i(X_RES, Y_RES));
-    eManager.addEnemy(sf::Vector2f(500, 500));
+    sf::Vector2f m(10, 100);
+    sf::Vector2f mrVec(4, 200);
+    for (int i = 0; i < 100; ++i) {
+        eManager.addEnemy(sf::Vector2f(mrVec.x * i, mrVec.y));
+    }
 
     //Hero Bounds Settings
     sf::RectangleShape heroBounds;
@@ -247,11 +257,14 @@ bool playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite back
             totalOffset += hero.getCurrentRunSpeed();
         }
 
-        if (hero.isDead()) {
+        if (eManager.checkShot(hero.getSprite().getGlobalBounds(), hero.getProjManager())) {
+            return true;
+            /*
             //Restart At Beginning
             windowScroll.move(-totalOffset, 0);
             background.move(-totalOffset, 0);
             totalOffset = 0;
+            */
         }
         level.updateLevel(hero.getSprite().getGlobalBounds());
 

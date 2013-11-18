@@ -6,14 +6,9 @@ const std::string EnemyManager::ENEMY_DATA_PATH("/res/level_data/"), EnemyManage
 using namespace std;
 
 EnemyManager::EnemyManager(sf::Vector2i windowBounds) : editingMode(false),
-    activeEnemies(), enemyCoords(), enemy(sf::Vector2f(0, 0)), wBounds(windowBounds)
+    activeEnemies(), enemyCoords(), enemy(sf::Vector2f(200, 200)), wBounds(windowBounds)
 {
-    enemyBounds.resize(3);
-    for (int i = 0; i < enemyBounds.size(); ++i) {
-        enemyBounds[i].setFillColor(sf::Color::Transparent);
-        enemyBounds[i].setOutlineColor(sf::Color::Black);
-        enemyBounds[i].setOutlineThickness(3);
-    }
+
 }
 
 EnemyManager::~EnemyManager()
@@ -100,9 +95,9 @@ bool EnemyManager::addEnemy(sf::Vector2f coord)
 void EnemyManager::updateEnemies(sf::FloatRect playerBounds, Level& level)
 {
     //Push new enemies on activeEnemies
-    while (!enemyCoords.empty() && enemyCoords.back().x - playerBounds.left <= wBounds.x) {
-        activeEnemies.push_back(Enemy(enemyCoords.back()));
-        enemyCoords.pop_back();
+    while (!enemyCoords.empty() && enemyCoords.front().x - playerBounds.left <= wBounds.x) {
+        activeEnemies.push_back(Enemy(enemyCoords.front()));
+        enemyCoords.erase(enemyCoords.begin());
     }
 
     //Check if enemy should shoot at player
@@ -126,15 +121,10 @@ void EnemyManager::updateEnemies(sf::FloatRect playerBounds, Level& level)
 
         sf::FloatRect shotBound(left, top, width, height);
 
-        enemyBounds[i].setSize(sf::Vector2f(width, height));
-        enemyBounds[i].setPosition(left, top);
-
-        if (!level.boundsCheck(shotBound) && playerBounds.intersects(shotBound)) {
+        if (!level.boundsCheck(shotBound) && playerBounds.intersects(shotBound))
             activeEnemies[i].shoot();
-        } else {
+        else
             activeEnemies[i].stopShoot();
-
-        }
     }
 
     //Update each enemy
@@ -147,13 +137,27 @@ void EnemyManager::updateEnemies(sf::FloatRect playerBounds, Level& level)
 
 void EnemyManager::drawEnemies(sf::RenderWindow& renderWindow)
 {
-    for (int i = 0; i < enemyBounds.size(); ++i)
-        renderWindow.draw(enemyBounds[i]);
-
     for (int i = 0; i < activeEnemies.size(); ++i) {
         renderWindow.draw(activeEnemies[i].getSprite());
         activeEnemies[i].drawProjectiles(renderWindow);
     }
+}
+
+bool EnemyManager::checkShot(const sf::FloatRect& entityBounds, ProjectileManager& entityBullets)
+{
+    bool entityShot = false;
+
+    for (int i = 0; i < activeEnemies.size(); ++i) {
+        //Check if entity was shot
+        if (!entityShot && activeEnemies[i].checkShot(entityBounds))
+            entityShot = true;
+
+        //Check if enemys were shot and if so, remove them
+        if (entityBullets.boundsCheck(activeEnemies[i].getSprite().getGlobalBounds()))
+            activeEnemies.erase(activeEnemies.begin() + i);
+    }
+
+    return entityShot;
 }
 
 Enemy& EnemyManager::getSampleEnemy()

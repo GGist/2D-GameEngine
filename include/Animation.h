@@ -5,6 +5,8 @@
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
+#include <iostream>
+#include <memory>
 #include <string>
 #include <fstream>
 #include <vector>
@@ -22,13 +24,13 @@ struct AnimBound {
 //Base Class
 class Animation {
 public:
-    Animation() : animationIndex(-1) {}
-    Animation(const Animation& anim) : textureBounds(anim.textureBounds),
-        loadedTextures(anim.loadedTextures) {}
-    virtual ~Animation() = 0;
-    const std::vector<AnimBound>& getTextureBounds();
+    Animation() : animationIndex(-1) { std::cout << "anim" << std::endl;}
+    Animation(const Animation& anim) : animationIndex(anim.animationIndex),
+        textureBounds(anim.textureBounds), loadedTextures(anim.loadedTextures)  { }
+    virtual ~Animation();
+    const std::vector<AnimBound>& getTextureBounds() const;
     //Returns textureBounds Which Is Synced With importedTextures
-    const std::vector<sf::Texture>& getLoadedTextures();
+    const std::vector<sf::Texture>& getLoadedTextures() const;
     //Returns loadedTextures
 
 protected:
@@ -44,7 +46,18 @@ private:
 };
 
 //Default Animations
-class CharacterAnim : public Animation{
+class BulletAnim : public Animation {
+private:
+    static const std::string PATH, MANIFEST, FORMAT;
+
+public:
+    BulletAnim();
+    virtual ~BulletAnim() {}
+
+    static const int BULLET = 0;
+};
+
+class CharacterAnim : public Animation {
 public:
     CharacterAnim(const std::string& path, const std::string& manifest, const std::string& format);
     virtual ~CharacterAnim() = 0;
