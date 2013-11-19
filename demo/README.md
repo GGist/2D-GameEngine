@@ -23,3 +23,7 @@ Controls:
 
 Screenshots:
 ------------
+![alt text](https://raw.github.com/GGist/2D-GameEngine/master/demo/screenshots/Preview.png "Preview")
+![alt text](https://raw.github.com/GGist/2D-GameEngine/master/demo/screenshots/Parachute.png "Parachute")
+![alt text](https://raw.github.com/GGist/2D-GameEngine/master/demo/screenshots/Shooting.png "Shooting")
+![alt text](https://raw.github.com/GGist/2D-GameEngine/master/demo/screenshots/Level_Editor.png "Level_Editor")
