@@ -1,10 +1,18 @@
+/***********************************************************************************
+*This class is used to manipulate projectiles which are used in all Character      *
+*objects. You can never explicitly delete a Projectile as they are deleted either  *
+*if they hit a wall in the level, they intersect something in boundsCheck() or this*
+*object is deleted (when a Character dies).                                        *
+*Full code at https://github.com/GGist/Sprite_Utility                              *
+*This code is licensed under the MIT License.                                      *
+***********************************************************************************/
+
 #ifndef PROJECTILE_H
 #define PROJECTILE_H
 
 #include <SFML/Graphics.hpp>
-#include <iostream>
-#include <fstream>
 #include <AnimationManager.h>
+#include <fstream>
 
 class Level;
 
@@ -22,14 +30,10 @@ class ProjectileManager
     public:
         ProjectileManager();
         //Constructor
-        //ProjectileManager(const ProjectileManager& pManager);
-        //Copy Constructor
         virtual ~ProjectileManager();
         //Destructor
         void addProjectile(sf::Vector2f starting, bool right);
         //Adds a projectile at the specified location and direction
-        void deleteProjectile();
-        //
         bool moveProjectiles(Level& currentLevel, sf::FloatRect playerBounds);
         //playerBounds NEEDS TO BE THE GLOBAL_BOUNDS FOR THE PLAYER
         //Moves the projectiles and checks for collision or off screen projectiles

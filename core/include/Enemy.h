@@ -1,5 +1,10 @@
 /***********************************************************************************
-
+*This class is used to create and manipulate pseudo computer controlled characters.*
+*Basic functionality is provided but it is recommended to not use this class       *
+*directly and instead use EnemyManager which will handle most of the other computer*
+*controlled functionality for you. This class is skinned with the EnemyAnim        *
+*Animation subclass. Full code at https://github.com/GGist/Sprite_Utility          *
+*This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
 #ifndef ENEMY_H
@@ -15,10 +20,13 @@ class Enemy : public Character
         virtual ~Enemy();
         //Destructor
         bool runOpposite();
-        //
-        //Returns false if xSpeed == 0
+        //Runs the opposite direction that the enemy is currently running
+        //Returns false if the enemy was not moving
         void stopShoot();
-        //
+        //Stops the shooting animation
+        void setPosition(float x, float y);
+        //Sets the position of the enemy sprite
+        //Should only be used in certain cases
         virtual bool checkProjectiles(Level& currentLevel);
         //Returns true if a projectile should be spawn at spawnPoint and sets it
         //to go right if shootingRight

@@ -1,16 +1,20 @@
 /***********************************************************************************
-
+*The animation class is used as a base class to inherit from. It will automate     *
+*loading in textures as long as you follow the naming convention (ANIM_DIRECTION_#)*
+*and provide it with a ~Manifest file. The textures as well as the bounds for the  *
+*textures will be stored in the class and are easily indexed using the             *
+*AnimationManager class. This is a heavy object. To keep code fast, reuse Animation*
+*objects whenever possible. Full code at https://github.com/GGist/Sprite_Utility   *
+*This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
 #ifndef ANIMATION_H
 #define ANIMATION_H
 
-#include <iostream>
-#include <memory>
+#include <SFML/Graphics.hpp>
 #include <string>
 #include <fstream>
 #include <vector>
-#include <SFML/Graphics.hpp>
 
 //Container Struct
 struct AnimBound {
@@ -24,7 +28,7 @@ struct AnimBound {
 //Base Class
 class Animation {
 public:
-    Animation() : animationIndex(-1) { std::cout << "anim" << std::endl;}
+    Animation() : animationIndex(-1) {}
     Animation(const Animation& anim) : animationIndex(anim.animationIndex),
         textureBounds(anim.textureBounds), loadedTextures(anim.loadedTextures)  { }
     virtual ~Animation();

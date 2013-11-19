@@ -1,5 +1,12 @@
 /***********************************************************************************
-
+*This class is used as a animation manipulator class. It allows easy access to     *
+*textures that were loaded in using the Animation class. Two ways I have used this *
+*class have either been to keep track of a specific animation that an object is    *
+*using or as an easy way to grab specific textures, ignoring the currentAnimation  *
+*functionality. This class will not clean up any dynamic memory that is passed in  *
+*and it is recommended to limit the creation of Animation classes you pass in as   *
+*they are heavy objects. Full code at https://github.com/GGist/Sprite_Utility      *
+*This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
 #ifndef AnimationManager_H
@@ -47,11 +54,13 @@ class AnimationManager
         //Returns the AnimBound for the specified animation
 
     private:
+        //Functions
         bool outOfBounds(const int& anim, const int& offset);
         //Returns true if the parameters are out of bounds
         void swapMembers(AnimationManager& aMgr);
         //Performs member-wise swap of data members
 
+        //Data
         const Animation* textures;
         const std::vector<AnimBound>* textureBounds;
         const std::vector<sf::Texture>* loadedTextures;

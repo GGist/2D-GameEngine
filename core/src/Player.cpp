@@ -187,6 +187,20 @@ bool Player::applySpeed(Level& currentLevel)
     return scroll;
 }
 
+bool Player::checkKnifed()
+{
+    //Check For Mid Knife Animation
+    if (knifed) {
+        int lastOff = aManager.getBounds(aManager.getCurrentAnimation()).last -
+                      aManager.getBounds(aManager.getCurrentAnimation()).first;
+
+        if (aManager.getCurrentOffset() == lastOff)
+            return true;
+    }
+
+    return false;
+}
+
 void Player::updateState()
 {
     int cAnimIndex = aManager.getBounds(aManager.getCurrentAnimation()).first + aManager.getCurrentOffset();

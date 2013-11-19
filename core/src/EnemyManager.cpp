@@ -1,7 +1,7 @@
 #include "EnemyManager.h"
 #include <Level.h>
 
-const std::string EnemyManager::ENEMY_DATA_PATH("/res/level_data/"), EnemyManager::ENEMY_DATA_NAME("Enemy_Coords.txt");
+const std::string EnemyManager::ENEMY_DATA_PATH("res/level_data/"), EnemyManager::ENEMY_DATA_NAME("Enemy_Coords.txt");
 
 using namespace std;
 
@@ -14,7 +14,8 @@ EnemyManager::EnemyManager(sf::Vector2i windowBounds) : editingMode(false),
 EnemyManager::~EnemyManager()
 {
     //Write to file
-    if (editingMode) {
+    if (editingMode && !enemyCoords.empty()) {
+        int i = 0;
         ofstream outputFile;
 
         sortEnemyCoords();
@@ -22,10 +23,12 @@ EnemyManager::~EnemyManager()
         outputFile.open((ENEMY_DATA_PATH + ENEMY_DATA_NAME).c_str());
 
         //Insert Coordinates In Descending Order
-        for (int i = 0; i < activeEnemies.size(); ++i) {
+        for (i = 0; i < enemyCoords.size() - 1; ++i) {
             outputFile << "(" << enemyCoords[i].x << ", "
                        << enemyCoords[i].y << ")" << endl;
         }
+        outputFile << "(" << enemyCoords[i].x << ", "
+                       << enemyCoords[i].y << ")";
 
         outputFile.close();
     }
@@ -51,7 +54,7 @@ bool EnemyManager::loadEnemies(std::string fileName)
             inputFile.ignore();
             getline(inputFile, temp, ')');
             y = stringToType<int>(temp);
-            enemyCoords.push_back(sf::Vector2f(x, x));
+            enemyCoords.push_back(sf::Vector2f(x, y));
             inputFile.ignore();
         }
     }
@@ -82,10 +85,10 @@ void EnemyManager::clearEnemies()
 
 bool EnemyManager::addEnemy(sf::Vector2f coord)
 {
-    //if (!editingMode)
-    //    return false;
+    if (!editingMode)
+        return false;
 
-    //activeEnemies.push_back(Enemy(coord));
+    activeEnemies.push_back(Enemy(coord));
     enemyCoords.push_back(coord);
 
     return true;
@@ -95,9 +98,9 @@ bool EnemyManager::addEnemy(sf::Vector2f coord)
 void EnemyManager::updateEnemies(sf::FloatRect playerBounds, Level& level)
 {
     //Push new enemies on activeEnemies
-    while (!enemyCoords.empty() && enemyCoords.front().x - playerBounds.left <= wBounds.x) {
-        activeEnemies.push_back(Enemy(enemyCoords.front()));
-        enemyCoords.erase(enemyCoords.begin());
+    while (!enemyCoords.empty() && enemyCoords.back().x - playerBounds.left <= wBounds.x) {
+        activeEnemies.push_back(Enemy(enemyCoords.back()));
+        enemyCoords.pop_back();
     }
 
     //Check if enemy should shoot at player
@@ -143,6 +146,20 @@ void EnemyManager::drawEnemies(sf::RenderWindow& renderWindow)
     }
 }
 
+void EnemyManager::removeEnemies(const sf::FloatRect& entityBounds)
+{
+    auto new_end = remove_if(activeEnemies.begin(), activeEnemies.end(),
+                             [&entityBounds, this] (const Enemy& enemy) {
+                             if (enemy.getSprite().getGlobalBounds().intersects(entityBounds)) {
+                                return true;
+                            }
+                            return false;
+                            });
+
+    activeEnemies.erase(new_end, activeEnemies.end());
+
+}
+
 bool EnemyManager::checkShot(const sf::FloatRect& entityBounds, ProjectileManager& entityBullets)
 {
     bool entityShot = false;
@@ -160,6 +177,16 @@ bool EnemyManager::checkShot(const sf::FloatRect& entityBounds, ProjectileManage
     return entityShot;
 }
 
+bool EnemyManager::setSampleEnemy(float x, float y)
+{
+    if (!editingMode)
+        return false;
+
+    enemy.setPosition(x, y);
+
+    return true;
+}
+
 Enemy& EnemyManager::getSampleEnemy()
 {
     return enemy;
@@ -168,26 +195,18 @@ Enemy& EnemyManager::getSampleEnemy()
 void EnemyManager::sortEnemyCoords()
 {
     sf::Vector2f temp;
-    int index;
+    int index = 0;
 
     //Insertion Sort
     for (int i = 1; i < enemyCoords.size(); ++i) {
-        index = i;
-        for (int j = 0; j < i; ++j) {
-            if (enemyCoords[j].x <= enemyCoords[i].x) {
-                if (enemyCoords[j].x != enemyCoords[i].x) {
-                    index = j;
-                } else {
-                    if (enemyCoords[j].y < enemyCoords[i].y)
-                        index = j;
-                }
-            }
+        index = i - 1;
+        temp = enemyCoords[i];
+        while (index >= 0 && (enemyCoords[index].x < temp.x) ||
+              (enemyCoords[index].x == temp.x && enemyCoords[index].y < temp.y)) {
+            enemyCoords[index + 1] = enemyCoords[index];
+            --index;
         }
-        if (index != i) {
-            temp = enemyCoords[i];
-            enemyCoords[i] = enemyCoords[index];
-            enemyCoords[index] = enemyCoords[i];
-        }
+        enemyCoords[index + 1] = temp;
     }
 }
 

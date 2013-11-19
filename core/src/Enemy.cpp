@@ -52,13 +52,20 @@ void Enemy::stopShoot()
     }
 }
 
+void Enemy::setPosition(float x, float y)
+{
+    xCoord = x;
+    yCoord = y;
+    lastSprite = currentSprite;
+    currentSprite.setPosition(xCoord, yCoord);
+}
+
 bool Enemy::checkProjectiles(Level& currentLevel)
 {
     sf::Vector2f spawnPoint;
     bool shootingRight, shotLast = false,
-        shootingAnimation = ((aManager.getBounds(aManager.getCurrentAnimation()).first +
-                             aManager.getCurrentOffset()) ==
-                             aManager.getBounds(aManager.getCurrentAnimation()).last - 1);
+        shootingAnimation = (aManager.getCurrentAnimation() == EnemyAnim::SHOOT_LEFT  || aManager.getCurrentAnimation() == EnemyAnim::SHOOT_RIGHT) &&
+                            ((aManager.getBounds(aManager.getCurrentAnimation()).first + aManager.getCurrentOffset()) == aManager.getBounds(aManager.getCurrentAnimation()).last - 1);
 
     if (shot && shootingAnimation && shotTimer.getElapsedTime().asSeconds() > SHOOT_CD) {
         if (aManager.getCurrentAnimation() == EnemyAnim::SHOOT_LEFT) {

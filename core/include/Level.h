@@ -1,6 +1,9 @@
 /***********************************************************************************
-Redo the class functions to make use of the new deque data structure being using to
-hold the tiles. (random access is available)
+*This class is used to both save out and load in tiles which collectively make up a*
+*level (without nemies, see EnemyManager). To see this object in use refer to the  *
+*Test_Engine.cpp file on the project github page.                                  *
+*Full code at https://github.com/GGist/Sprite_Utility                              *
+*This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
 #ifndef LEVEL_H
@@ -36,6 +39,9 @@ class Level
         //Updates the coordinates in tileCoords and sets the first coordinate in the queue
         void drawLevel(sf::RenderWindow& renderWindow);
         //Draws the current tiles to the renderWindow
+        bool setSampleTile(int x, int y);
+        //Sets the position of the SampleTile
+        //Returns false if !editingMode
         const sf::Sprite& getSampleTile() const;
         //Returns the Sprite tile
 
@@ -77,7 +83,7 @@ class Level
         std::deque<sf::Sprite> activeTiles;
         std::deque<sf::Vector2f> tileCoords;
         sf::Texture tileTexture;
-        sf::Sprite tile;
+        sf::Sprite tile, sampleTile;
         sf::Vector2f firstVec;
 };
 

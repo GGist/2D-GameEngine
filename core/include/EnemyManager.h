@@ -1,11 +1,19 @@
 /***********************************************************************************
-
+*This class is used as an interface to creating and controlling Enemy objects. This*
+*class will accept state from the outside and remove enemies accordingly but the   *
+*enemies should not be accessibly to outside code, all state checking will be      *
+*handled through this object. Automating the enemies has been reduced down to a few*
+*function calls. To see this class in use refer to the Test_Engine.cpp file on the *
+*github page.                                                                      *
+*Full code at https://github.com/GGist/Sprite_Utility                              *
+*This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
 #ifndef ENEMYMANAGER_H
 #define ENEMYMANAGER_H
 
 #include <Enemy.h>
+#include <fstream>
 #include <sstream>
 
 class EnemyManager
@@ -32,9 +40,15 @@ class EnemyManager
         //Updates the enemies that are currently on the screen
         void drawEnemies(sf::RenderWindow& renderWindow);
         //Draws the enemies and their projectiles to the renderWindow
+        void removeEnemies(const sf::FloatRect& entityBounds);
+        //Checks if the any enemies are within entityBounds and deletes them
+        //This should be used for melee attacks
         bool checkShot(const sf::FloatRect& entityBounds, ProjectileManager& entityBullets);
         //Removes any enemys that intersects with entityBullets
         //Returns true if any of the enemy's bullets are within the entityBounds
+        bool setSampleEnemy(float x, float y);
+        //Sets the position of the SampleEnemy
+        //Returns false if !editingMode
         Enemy& getSampleEnemy();
         //Returns a sample enemy textured sprite
 

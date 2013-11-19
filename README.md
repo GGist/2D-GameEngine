@@ -1,24 +1,19 @@
-SFML-Shooter
+2D-GameEngine
 ============
 This project was started freshman year of college as something to get myself familiar with the SFML library. It has now 
-turned into a 2D game that I have been developing in my spare time. It has gone through two major overhauls, the first 
+turned into a 2D game engine that I have been developing in my spare time. It has gone through two major overhauls, the first 
 was after realizing I wanted to be able to create more complex animations instead of one or two textured animations. 
-The second was to create a better design pattern that allowed for greater extensibility. If I was to re-write the game
+The second was to create a better design pattern that allowed for greater extensibility. If I was to re-write the game engine
 from scratch I believe I could come up with a better design but after creating the majority of it when I was just
-playing around with SFML, I decided I would salvage what I could. This project is still a work in progress.
+playing around with SFML, I decided I would salvage what I could. This project has been polished up and is finished.
 
-Game Description:
+Engine Description:
 -----------------
-This is a simple 2D (Commando inspired) side-scrolling shooter type game. You must advance through the levels, taking out
-enemies along your way. There is also a level editor that allows you to create your own levels and position the enemies 
-how you like.
+This engine will allow you to easily manage enemies, players, levels, projectiles, and animations. If you are going to use
+this engine and would like to add animations via a sprite sheet I suggest grabbing and building the Sprite_Utility that I
+also made and put on github. I have provided a demo class with a main file included to show you how the classes are to be
+used. From this you should be able to create trivial 2D games fairly quick.
 
-Controls:
----------
--W A S D to move<br \>
--Left Mouse Button to shoot<br \>
--Right Mouse Button to knife<br \>
--Spacebar to deploy parachute<br \>
 
 Required DLLs:
 --------------
@@ -26,6 +21,9 @@ SFML 2.0 (or later) DLLs<br \>
 
 Update Log:
 -----------
+**V1.0 Release**<br \>
++EnemyManager implemented and tested
+
 **V0.9**<br \>
 +Changed the structure and implementation of the functions pertaining to animations and
  projectiles in Character and Player to allow Enemy to utilize a better interface<br \>
@@ -87,11 +85,3 @@ Update Log:
 +Level loading from local storage<br \>
 +Character-Level collision detection<br \>
 +Projectile-Level collision detection
-
-Features To Be Added:
---------------------
-Enemies with AI<br \>
-Possibly Fullscreen Integration<br \>
-GUI Menu (Instead Of Command Prompt)<br \>
-In Game Sound<br \>
-End of level sequence<br \>

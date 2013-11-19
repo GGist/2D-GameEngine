@@ -1,11 +1,16 @@
 /***********************************************************************************
-
+*This class is used to represent playable characters and is currently skinned as a *
+*PlayerAnim Animation object. This class provides extended functionality in that   *
+*knifing and parachuting animations have been added so the relevant functions have *
+*been modified to account for this. To see this class in action refer to the       *
+*Test_Engine.cpp file on the project github page.                                  *
+*Full code at https://github.com/GGist/Sprite_Utility                              *
+*This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
 #ifndef PLAYER_H
 #define PLAYER_H
 
-#include <memory>
 #include <Character.h>
 
 class Player : public Character
@@ -31,6 +36,8 @@ class Player : public Character
         virtual bool applySpeed(Level& currentLevel);
         //Moves currentSprite based on xSpeed and ySpeed and updates it's animation
         //Returns true if the background needs to be scrolled
+        bool checkKnifed();
+        //Returns true if the character is on the LAST KNIFE animation
 
     private:
         //Constants

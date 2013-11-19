@@ -3,7 +3,7 @@
 using namespace std;
 
 const sf::Vector2f Level::SCALE(1.2, 1.2);
-const string Level::TILE_NAME("Tile (14)"), Level::TILE_PATH("res/tiles/"), Level::TILE_FORMAT(".png"),
+const string Level::TILE_NAME("Tile"), Level::TILE_PATH("res/tiles/"), Level::TILE_FORMAT(".png"),
     Level::LEVEL_NAME("Level_Coords.txt"), Level::LEVEL_PATH("res/level_data/");
 
 Level::Level(sf::Vector2i windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(windowRes.y),
@@ -11,14 +11,16 @@ Level::Level(sf::Vector2i windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(
 {
     tileTexture.loadFromFile(TILE_PATH + TILE_NAME + TILE_FORMAT);
     tile.setTexture(tileTexture);
+    sampleTile.setTexture(tileTexture);
 
     tile.scale(SCALE);
+    sampleTile.scale(SCALE);
     tile.setPosition(sf::Vector2f(-tile.getGlobalBounds().width, -tile.getGlobalBounds().height));
 }
 
 Level::~Level()
 {
-    if (editingMode) {
+    if (editingMode && !tileCoords.empty()) {
         int i;
         ofstream outputFile;
 
@@ -127,9 +129,19 @@ void Level::drawLevel(sf::RenderWindow& renderWindow)
     }
 }
 
+bool Level::setSampleTile(int x, int y)
+{
+    if (!editingMode)
+        return false;
+
+    sampleTile.setPosition(x, y);
+
+    return true;
+}
+
 const sf::Sprite& Level::getSampleTile() const
 {
-    return tile;
+    return sampleTile;
 }
 
 bool Level::sortTileQueue()
