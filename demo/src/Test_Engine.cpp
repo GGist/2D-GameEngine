@@ -26,7 +26,7 @@ bool Test_Engine::playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf
     EnemyManager eManager(SCREEN_RES);
     Level level(SCREEN_RES);
     int totalOffset = 0;
-    bool windowFocused = true;
+    bool windowFocused = true, exit = false;;
     sf::Event mainEvent;
     sf::Clock timeStep;
     int test = 0;
@@ -41,19 +41,18 @@ bool Test_Engine::playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf
     level.loadLevel(LEVEL_DATA);
     eManager.loadEnemies(ENEMY_DATA);
 
-    while (window.isOpen()) {
+    while (!exit) {
         frameLimiter(timeStep.getElapsedTime());
         timeStep.restart();
         while (window.pollEvent(mainEvent)) {
             switch (mainEvent.type) {
                 //The exit button in upper right corner
                 case sf::Event::Closed:
-                    window.close();
+                    exit = true;
                     break;
                 case sf::Event::KeyPressed:
-                    if (mainEvent.key.code == sf::Keyboard::Escape) {
-                        window.close();
-                    }
+                    if (mainEvent.key.code == sf::Keyboard::Escape)
+                        exit = true;
                     break;
                 case sf::Event::KeyReleased:
                     if (mainEvent.key.code == sf::Keyboard::Space) {
@@ -67,9 +66,6 @@ bool Test_Engine::playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf
                     break;
                 case sf::Event::GainedFocus:
                     windowFocused = true;
-                    break;
-                case sf::Event::MouseMoved:
-                    //cout << "(" << mainEvent.mouseMove.x << ", " << mainEvent.mouseMove.y << ")" << endl;
                     break;
             }
         }
@@ -113,7 +109,7 @@ bool Test_Engine::playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf
         }
 
         if (eManager.checkShot(hero.getSprite().getGlobalBounds(), hero.getProjManager())) {
-            return true;
+            return false;
         }
         if (hero.checkKnifed()){
             eManager.removeEnemies(hero.getSprite().getGlobalBounds());
@@ -138,6 +134,8 @@ bool Test_Engine::playLevel(sf::RenderWindow& window, sf::View& windowScroll, sf
         //End Drawing Window
         window.display();
     }
+
+    return false;
 }
 
 bool Test_Engine::editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf::Sprite background)
@@ -146,21 +144,21 @@ bool Test_Engine::editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf
     Level level(SCREEN_RES);
     EnemyManager eManager(SCREEN_RES);
     const int TILE_WIDTH = level.getSampleTile().getGlobalBounds().width, ENEMY_WIDTH = eManager.getSampleEnemy().getSprite().getGlobalBounds().width;
-    bool held = false, windowFocused = true, tileActive = false;
+    bool held = false, windowFocused = true, tileActive = false, exit = false;
     int x, y, lastX, lastY, scroll = 0;
 
     level.setEditorMode(true);
     eManager.setEditorMode(true);
-    while (window.isOpen()) {
+    while (!exit) {
         while (window.pollEvent(mainEvent)) {
             switch (mainEvent.type) {
                 //The exit button in upper right corner
                 case sf::Event::Closed:
-                    window.close();
+                    exit = true;
                     break;
                 case sf::Event::KeyPressed:
                     if (mainEvent.key.code == sf::Keyboard::Escape)
-                        window.close();
+                        exit = true;
                     else if (mainEvent.key.code == sf::Keyboard::Space) {
                         tileActive = (tileActive) ? false : true;
                         if (tileActive)
@@ -233,6 +231,10 @@ bool Test_Engine::editLevel(sf::RenderWindow& window, sf::View& windowScroll, sf
 
         }
     }
+    eManager.saveEnemies(ENEMY_DATA);
+    level.saveLevel(LEVEL_DATA);
+
+    return false;
 }
 
 /***********************************************************************************
@@ -247,7 +249,7 @@ void Test_Engine::frameLimiter(sf::Time previousTime)
 {
     sf::Clock currentWait;
 
-    if (previousTime.asSeconds() < abs(1.0 / FPS)) {
+    if (previousTime.asSeconds() < 1.0 / FPS) {
         while (currentWait.getElapsedTime().asSeconds() < abs((1.0 / FPS) - previousTime.asSeconds())) {
         }
     }

@@ -20,8 +20,9 @@ class Level
         //Constructor
         virtual ~Level();
         //Destructor
-        //If editing mode was enabled it will save out any coordinate
-        //data for each tile to a text file that can be loaded in
+        bool saveLevel(std::string fileName);
+        //Saves the level out to the specified fileName
+        //Returns false if not in editing mode or tileCoords is empty
         bool loadLevel(std::string fileName);
         //Loads the level from a file
         //Returns false if file could not be found

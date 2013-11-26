@@ -39,10 +39,10 @@ int main()
 
         mainWindow.setVisible(true);
         if (userResponse == 'E') {
-            if (!Test_Engine::editLevel(mainWindow, mainWindowScroll, background))
+            if (Test_Engine::editLevel(mainWindow, mainWindowScroll, background))
                 return 0;
         } else if (userResponse == 'G') {
-            if (!Test_Engine::playLevel(mainWindow, mainWindowScroll, background))
+            if (Test_Engine::playLevel(mainWindow, mainWindowScroll, background))
                 return 0;
         }
         mainWindow.setVisible(false);

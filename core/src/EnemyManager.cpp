@@ -13,25 +13,37 @@ EnemyManager::EnemyManager(sf::Vector2i windowBounds) : editingMode(false),
 
 EnemyManager::~EnemyManager()
 {
+
+}
+
+bool EnemyManager::saveEnemies(string fileName)
+{
+    if (!editingMode || enemyCoords.empty())
+        return false;
+
     //Write to file
-    if (editingMode && !enemyCoords.empty()) {
-        int i = 0;
-        ofstream outputFile;
+    int i = 0;
+    ofstream outputFile;
 
-        sortEnemyCoords();
+    sortEnemyCoords();
 
-        outputFile.open((ENEMY_DATA_PATH + ENEMY_DATA_NAME).c_str());
+    outputFile.open((ENEMY_DATA_PATH + ENEMY_DATA_NAME).c_str());
 
+    if (outputFile.is_open()) {
         //Insert Coordinates In Descending Order
         for (i = 0; i < enemyCoords.size() - 1; ++i) {
             outputFile << "(" << enemyCoords[i].x << ", "
                        << enemyCoords[i].y << ")" << endl;
         }
         outputFile << "(" << enemyCoords[i].x << ", "
-                       << enemyCoords[i].y << ")";
+                   << enemyCoords[i].y << ")";
 
         outputFile.close();
+
+        return true;
     }
+
+    return false;
 }
 
 bool EnemyManager::loadEnemies(std::string fileName)

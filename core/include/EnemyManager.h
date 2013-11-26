@@ -23,8 +23,9 @@ class EnemyManager
         //Constructor
         virtual ~EnemyManager();
         //Destructor
-        //If editing mode was enabled it will save out any coordinate
-        //data for each enemy to a text file that can be loaded in
+        bool saveEnemies(std::string fileName);
+        //Saves the enemy coordinates to the specified text file
+        //Returns false if not in editing mode or enemyCoords is empty
         bool loadEnemies(std::string fileName);
         //Loads the enemy coordinates located in fileName
         //Returns false if the file could not be found

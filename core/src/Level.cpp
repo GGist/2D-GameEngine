@@ -20,25 +20,37 @@ Level::Level(sf::Vector2i windowRes) : SCREEN_WIDTH(windowRes.x), SCREEN_HEIGHT(
 
 Level::~Level()
 {
-    if (editingMode && !tileCoords.empty()) {
-        int i;
-        ofstream outputFile;
 
-        sortTileQueue();
-        removeDuplicates();
+}
 
-        outputFile.open((LEVEL_PATH + LEVEL_NAME).c_str());
+bool Level::saveLevel(string fileName)
+{
+    if (!editingMode || tileCoords.empty())
+        return false;
 
+    int i;
+    ofstream outputFile;
+
+    sortTileQueue();
+    removeDuplicates();
+
+    outputFile.open((LEVEL_PATH + LEVEL_NAME).c_str());
+
+    if (outputFile.is_open()) {
         for (i = 0; i < tileCoords.size() - 1; ++i) {
             outputFile << "(" << tileCoords[i].x << ", "
                        << tileCoords[i].y << ")" << endl;
         }
         //So that there is no newline at end of file
         outputFile << "(" << tileCoords[i].x << ", "
-                       << tileCoords[i].y << ")";
+                   << tileCoords[i].y << ")";
 
         outputFile.close();
+
+        return true;
     }
+
+    return false;
 }
 
 bool Level::loadLevel(string fileName)

@@ -27,7 +27,9 @@ AnimationManager& AnimationManager::operator=(const AnimationManager& rhs)
 
 AnimationManager::~AnimationManager()
 {
-
+    textures = nullptr;
+    textureBounds = nullptr;
+    loadedTextures = nullptr;
 }
 
 bool AnimationManager::setTexture(const int anim, const int offset)
