@@ -84,3 +84,7 @@ Update Log:
 +Level loading from local storage<br \>
 +Character-Level collision detection<br \>
 +Projectile-Level collision detection
+
+
+[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/GGist/2d-gameengine/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
+
