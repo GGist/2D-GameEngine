@@ -4,7 +4,7 @@
 *knifing and parachuting animations have been added so the relevant functions have *
 *been modified to account for this. To see this class in action refer to the       *
 *Test_Engine.cpp file on the project github page.                                  *
-*Full code at https://github.com/GGist/Sprite_Utility                              *
+*Full code at https://github.com/GGist/2D-GameEngine                               *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 

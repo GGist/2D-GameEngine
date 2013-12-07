@@ -5,7 +5,7 @@
 *using or as an easy way to grab specific textures, ignoring the currentAnimation  *
 *functionality. This class will not clean up any dynamic memory that is passed in  *
 *and it is recommended to limit the creation of Animation classes you pass in as   *
-*they are heavy objects. Full code at https://github.com/GGist/Sprite_Utility      *
+*they are heavy objects. Full code at https://github.com/GGist/2D-GameEngine       *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 

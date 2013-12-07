@@ -4,7 +4,7 @@
 *The most useful default behavior wrapped in this class is the character tracking  *
 *which will make sure animations are repositioned when they are changing size.     *
 *Projectile functionality is also provided which is fairly self explanatory.       *
-*Full code at https://github.com/GGist/Sprite_Utility                              *
+*Full code at https://github.com/GGist/2D-GameEngine                               *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 

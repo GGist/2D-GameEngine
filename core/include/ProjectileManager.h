@@ -3,7 +3,7 @@
 *objects. You can never explicitly delete a Projectile as they are deleted either  *
 *if they hit a wall in the level, they intersect something in boundsCheck() or this*
 *object is deleted (when a Character dies).                                        *
-*Full code at https://github.com/GGist/Sprite_Utility                              *
+*Full code at https://github.com/GGist/2D-GameEngine                               *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 

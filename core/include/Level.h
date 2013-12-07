@@ -2,7 +2,7 @@
 *This class is used to both save out and load in tiles which collectively make up a*
 *level (without nemies, see EnemyManager). To see this object in use refer to the  *
 *Test_Engine.cpp file on the project github page.                                  *
-*Full code at https://github.com/GGist/Sprite_Utility                              *
+*Full code at https://github.com/GGist/2D-GameEngine                               *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
