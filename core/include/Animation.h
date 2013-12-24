@@ -4,7 +4,7 @@
 *and provide it with a ~Manifest file. The textures as well as the bounds for the  *
 *textures will be stored in the class and are easily indexed using the             *
 *AnimationManager class. This is a heavy object. To keep code fast, reuse Animation*
-*objects whenever possible. Full code at https://github.com/GGist/2D-GameEngine    *
+*objects whenever possible. Full code at https://github.com/GGist/SpriteEngine    *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 

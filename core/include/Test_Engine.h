@@ -1,7 +1,7 @@
 /***********************************************************************************
 *This class is used to demo my SFML 2D Game Engine which is made up of all of the  *
 *other classes included with the project on the github page.                       *
-*Full code at https://github.com/GGist/2D-GameEngine                               *
+*Full code at https://github.com/GGist/SpriteEngine                               *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 

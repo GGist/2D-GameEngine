@@ -3,7 +3,7 @@
 *Basic functionality is provided but it is recommended to not use this class       *
 *directly and instead use EnemyManager which will handle most of the other computer*
 *controlled functionality for you. This class is skinned with the EnemyAnim        *
-*Animation subclass. Full code at https://github.com/GGist/2D-GameEngine           *
+*Animation subclass. Full code at https://github.com/GGist/SpriteEngine           *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
@@ -11,6 +11,7 @@
 #define ENEMY_H
 
 #include <Character.h>
+#include <memory>
 
 class Enemy : public Character
 {

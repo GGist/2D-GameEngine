@@ -7,9 +7,9 @@ using namespace std;
 
 static const EnemyAnim* getEnemyAnim()
 {
-    static EnemyAnim* eAnim = new EnemyAnim;
+    static unique_ptr<EnemyAnim> eAnim(new EnemyAnim);
 
-    return eAnim;
+    return eAnim.get();
 }
 
 Enemy::Enemy(sf::Vector2f startingPos) : Character(getEnemyAnim()),
@@ -63,8 +63,8 @@ void Enemy::setPosition(float x, float y)
 bool Enemy::checkProjectiles(Level& currentLevel)
 {
     sf::Vector2f spawnPoint;
-    bool shootingRight, shotLast = false,
-        shootingAnimation = (aManager.getCurrentAnimation() == EnemyAnim::SHOOT_LEFT  || aManager.getCurrentAnimation() == EnemyAnim::SHOOT_RIGHT) &&
+    bool shootingRight,
+    shootingAnimation = (aManager.getCurrentAnimation() == EnemyAnim::SHOOT_LEFT  || aManager.getCurrentAnimation() == EnemyAnim::SHOOT_RIGHT) &&
                             ((aManager.getBounds(aManager.getCurrentAnimation()).first + aManager.getCurrentOffset()) == aManager.getBounds(aManager.getCurrentAnimation()).last - 1);
 
     if (shot && shootingAnimation && shotTimer.getElapsedTime().asSeconds() > SHOOT_CD) {

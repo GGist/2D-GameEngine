@@ -7,9 +7,9 @@ const sf::Vector2f Player::SPRITE_SCALE(2.0, 2.0), Player::STARTING_POSITION(200
 
 static const PlayerAnim* getPlayerAnim()
 {
-    static PlayerAnim* pAnim = new PlayerAnim;
+    static unique_ptr<PlayerAnim> pAnim(new PlayerAnim);
 
-    return pAnim;
+    return pAnim.get();
 }
 
 Player::Player(sf::Vector2i windowBounds) : Character(getPlayerAnim()), wBounds(sf::Vector2i(0, 0),

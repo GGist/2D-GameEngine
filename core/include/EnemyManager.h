@@ -5,7 +5,7 @@
 *handled through this object. Automating the enemies has been reduced down to a few*
 *function calls. To see this class in use refer to the Test_Engine.cpp file on the *
 *github page.                                                                      *
-*Full code at https://github.com/GGist/2D-GameEngine                               *
+*Full code at https://github.com/GGist/SpriteEngine                               *
 *This code is licensed under the MIT License.                                      *
 ***********************************************************************************/
 
