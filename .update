@@ -1,4 +1,0 @@
-cd && 
-cp -r C://Dropbox//Workspace\ \(C++\)//SFML_GameEngine//src C://Users//GG//GitHub//SpriteEngine//core &&
-cp -r C://Dropbox//Workspace\ \(C++\)//SFML_GameEngine//include C://Users//GG//GitHub//SpriteEngine//core && 
-cp -r C://Dropbox//Workspace\ \(C++\)//SFML_GameEngine//res C://Users//GG//GitHub//SpriteEngine
