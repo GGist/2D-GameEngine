@@ -1,4 +1,4 @@
-2D-GameEngine
+SpriteEngine
 ============
 This project was started freshman year of college as something to get myself familiar with the SFML library. It has now 
 turned into a 2D game engine that I have been developing in my spare time. It has gone through two major overhauls, the first 
