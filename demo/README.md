@@ -1,7 +1,5 @@
 Demo
 ====
-About:
-------
 This demo will show you how to use my 2D-GameEngine. It includes a level editor and a way to run the level you 
 created. A save feature has not been implemented so you can only run levels you have just created. This should be
 easy enough to implement if you were to want one though.

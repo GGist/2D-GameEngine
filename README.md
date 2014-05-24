@@ -1,22 +1,25 @@
 SpriteEngine
 ============
-This project was started freshman year of college as something to get myself familiar with the SFML library. It has now 
-turned into a 2D game engine that I have been developing in my spare time. It has gone through two major overhauls, the first 
-was after realizing I wanted to be able to create more complex animations instead of one or two textured animations. 
-The second was to create a better design pattern that allowed for greater extensibility. If I was to re-write the game engine
-from scratch I believe I could come up with a better design but after creating the majority of it when I was just
-playing around with SFML, I decided I would salvage what I could. This project has been polished up and is finished.
+This project was started freshman year of college as something to get myself 
+familiar with the SFML library. It has now turned into a 2D game engine that I 
+have been developing in my spare time. It has gone through two major overhauls, 
+the first was after realizing I wanted to be able to create more complex 
+animations instead of one or two textured animations. The second was to create
+ better design that would allow for greater extensibility. If I was to re-write 
+the game engine from scratch I believe I could come up with a better design, but after creating the majority of it when I was just playing around with SFML, I decided I would salvage what I could.
 
 Engine Description:
 -----------------
-This engine will allow you to easily manage enemies, players, levels, projectiles, and animations. If you are going to use
-this engine and would like to add animations via a sprite sheet I suggest grabbing and building the Sprite_Utility that I
-also made and put on github. I have provided a demo class with a main file included to show you how the classes are to be
-used. From this you should be able to create trivial 2D games fairly quick.
+This engine will allow you to easily manage enemies, players, levels, 
+projectiles, and animations. If you are going to use this engine and would like 
+to add animations via a sprite sheet I suggest grabbing and building the 
+**SpriteUtility** program that I made. I have provided a demo class with a main 
+file included to show you how the classes are to be used. From this you should 
+be able to create trivial 2D games fairly quick.
 
 Required DLLs:
 --------------
-SFML 2.0 (or later) DLLs<br \>
+SFML 2.0 (or later) libraries<br \>
 
 Update Log:
 -----------
@@ -84,7 +87,3 @@ Update Log:
 +Level loading from local storage<br \>
 +Character-Level collision detection<br \>
 +Projectile-Level collision detection
-
-
-[![Bitdeli Badge](https://d2weczhvl823v0.cloudfront.net/GGist/spriteengine/trend.png)](https://bitdeli.com/free "Bitdeli Badge")
-
