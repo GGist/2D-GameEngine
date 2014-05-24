@@ -14,9 +14,9 @@ this engine and would like to add animations via a sprite sheet I suggest grabbi
 also made and put on github. I have provided a demo class with a main file included to show you how the classes are to be
 used. From this you should be able to create trivial 2D games fairly quick.
 
-Required DLLs:
+Dependencies:
 --------------
-SFML 2.0 (or later) DLLs<br \>
+SFML 2.0 (or later) libraries<br \>
 
 Update Log:
 -----------
